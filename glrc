@@ -42,7 +42,7 @@ session.mount(
 )
 
 
-def get(get_data):
+def download_gitlab_data(get_data):
     url, mr_id = get_data
     response = session.get(url, headers={"PRIVATE-TOKEN": secret_token})
     response_json = json.loads(response.content)
@@ -81,13 +81,13 @@ def get(get_data):
     return response_json, mr_id
 
 
-def references_user(notes, uname):
+def is_user_referenced_in_thread(notes, uname):
     for note in notes:
         if ("@" + uname) in note["body"]:
             return True
 
 
-def is_author(mr, notes, uname):
+def is_user_author_of_thread(mr, notes, uname):
     if mr["author"] == uname:
         if notes[-1]["author"]["username"] != uname:
             return True
@@ -95,7 +95,7 @@ def is_author(mr, notes, uname):
     return False
 
 
-def contains_user(notes, uname):
+def is_user_participating_in_thread(notes, uname):
     for note in notes:
         if note["author"]["username"] == uname:
             return True
@@ -103,7 +103,7 @@ def contains_user(notes, uname):
     return False
 
 
-def get_row_style(notes, needs_reply, uname):
+def get_rows_highlighting(notes, needs_reply, uname):
     """Messages after your own last message should be highlighted"""
     n_replies = len(comment["notes"])
     author_list = [n["author"]["username"] for n in notes]
@@ -219,11 +219,11 @@ three_weeks_ago = (datetime.datetime.now() - datetime.timedelta(weeks=3)).isofor
 ] + "Z"
 created_after = f"&created_after={three_weeks_ago}" if args.fast else ""
 
-projects = ["3996", "4913"]
+project_ids = ["3996", "4913"]
 base_data = []
 with Progress(transient=True, expand=True) as progress:
     downloading = progress.add_task("[green]Downloading MR data...", start=False)
-    for project in projects:
+    for project in project_ids:
         merge_requests_data = json.loads(
             requests.get(
                 f"{api_url}"
@@ -259,7 +259,7 @@ with Progress(transient=True, expand=True) as progress:
         progress.start_task(downloading)
         progress.update(downloading, total=len(all_data))
         for response_json, mr_id in executor.map(
-            get, [(mr["url"], id) for id, mr in all_data.items()]
+            download_gitlab_data, [(mr["url"], id) for id, mr in all_data.items()]
         ):
             all_data[mr_id]["discussion_data"] = response_json
             progress.update(downloading, advance=1)
@@ -273,12 +273,11 @@ for id, mr in all_data.items():
     data = [
         c
         for c in data
-        if contains_user(c["notes"], user)
-        or references_user(c["notes"], user)
-        or is_author(mr, c["notes"], user)
+        if is_user_participating_in_thread(c["notes"], user)
+        or is_user_referenced_in_thread(c["notes"], user)
+        or is_user_author_of_thread(mr, c["notes"], user)
     ]
     n_your_notes = len(data)
-    # pprint(data[0])
 
     n_response_required = len(
         [1 for comment in data if comment["notes"][-1]["author"]["username"] != user]
@@ -323,7 +322,7 @@ for id, mr in all_data.items():
 
         bordercol = f"{col}" if reply_needed else "white"
 
-        row_style = get_row_style(comment["notes"], reply_needed, user)
+        row_style = get_rows_highlighting(comment["notes"], reply_needed, user)
 
         table = Table(
             show_header=True,
