@@ -220,9 +220,9 @@ three_weeks_ago = (datetime.datetime.now() - datetime.timedelta(weeks=3)).isofor
 created_after = f"&created_after={three_weeks_ago}" if args.fast else ""
 
 project_ids = ["3996", "4913"]
-base_data = []
+mr_pages = []
 with Progress(transient=True, expand=True) as progress:
-    downloading = progress.add_task("[green]Downloading MR data...", start=False)
+    gitlab_download_task = progress.add_task("[green]Downloading MR data...", start=False)
     for project in project_ids:
         merge_requests_data = json.loads(
             requests.get(
@@ -235,20 +235,20 @@ with Progress(transient=True, expand=True) as progress:
         if isinstance(merge_requests_data, dict):
             raise Exception(merge_requests_data)
         else:
-            base_data += [
+            mr_pages += [
                 mr for mr in merge_requests_data if str(mr["iid"]) not in args.ignore
             ]
 
-    all_data = {
+    mrs = {
         mr["iid"]: {
             "mr_data": mr,
             "project": mr["project_id"],
             "author": mr["author"]["username"],
         }
-        for mr in base_data
+        for mr in mr_pages
     }
-    for id, mr in all_data.items():
-        all_data[id]["url"] = (
+    for id, mr in mrs.items():
+        mrs[id]["url"] = (
             f"{api_url}"
             f"/projects/{mr['project']}/merge_requests/{id}/discussions"
             f"?per_page=500"
@@ -256,36 +256,36 @@ with Progress(transient=True, expand=True) as progress:
 
     with ThreadPoolExecutor(max_workers=THREAD_POOL) as executor:
         # wrap in a list() to wait for all requests to complete
-        progress.start_task(downloading)
-        progress.update(downloading, total=len(all_data))
+        progress.start_task(gitlab_download_task)
+        progress.update(gitlab_download_task, total=len(mrs))
         for response_json, mr_id in executor.map(
-            download_gitlab_data, [(mr["url"], id) for id, mr in all_data.items()]
+            download_gitlab_data, [(mr["url"], id) for id, mr in mrs.items()]
         ):
-            all_data[mr_id]["discussion_data"] = response_json
-            progress.update(downloading, advance=1)
+            mrs[mr_id]["discussion_data"] = response_json
+            progress.update(gitlab_download_task, advance=1)
 
 
-for id, mr in all_data.items():
-    data = mr["discussion_data"]
-    data = [c for c in data if "resolved" in c["notes"][0]]
-    data = [c for c in data if not c["notes"][0]["resolved"]]
-    n_notes = len(data)
-    data = [
+for id, mr in mrs.items():
+    discussion_data = mr["discussion_data"]
+    discussion_data = [c for c in discussion_data if "resolved" in c["notes"][0]]
+    discussion_data = [c for c in discussion_data if not c["notes"][0]["resolved"]]
+    n_notes = len(discussion_data)
+    discussion_data = [
         c
-        for c in data
+        for c in discussion_data
         if is_user_participating_in_thread(c["notes"], user)
         or is_user_referenced_in_thread(c["notes"], user)
         or is_user_author_of_thread(mr, c["notes"], user)
     ]
-    n_your_notes = len(data)
+    n_your_notes = len(discussion_data)
 
     n_response_required = len(
-        [1 for comment in data if comment["notes"][-1]["author"]["username"] != user]
+        [1 for comment in discussion_data if comment["notes"][-1]["author"]["username"] != user]
     )
 
-    col = random.choice(colors)
+    color = random.choice(colors)
 
-    if len(data) > 0:
+    if len(discussion_data) > 0:
         if n_response_required == 0 and not args.all:
             continue
         print()
@@ -301,7 +301,7 @@ for id, mr in all_data.items():
             if already_a_link:
                 jira = already_a_link.group(1)
 
-        panel = Panel(
+        mr_info_header = Panel(
             Text(
                 f"Open discussions: {n_notes}"
                 f"\nOpen discussions where you are involved: {n_your_notes}"
@@ -310,41 +310,41 @@ for id, mr in all_data.items():
                 f"\nJira:   {jira_url}/{jira}"
                 f"\n\n{mr['mr_data']['description']}"
             ),
-            title=f"[bold {col}]{mr['mr_data']['title']} | !{mr['mr_data']['iid']} | {jira}",
+            title=f"[bold {color}]{mr['mr_data']['title']} | !{mr['mr_data']['iid']} | {jira}",
             width=112,
         )
-        console.print(panel)
+        console.print(mr_info_header)
 
-    for comment in data:
+    for comment in discussion_data:
         reply_needed = False
         if comment["notes"][-1]["author"]["username"] != user:
             reply_needed = True
 
-        bordercol = f"{col}" if reply_needed else "white"
+        border_color = f"{color}" if reply_needed else "white"
 
-        row_style = get_rows_highlighting(comment["notes"], reply_needed, user)
+        row_highlighting_style = get_rows_highlighting(comment["notes"], reply_needed, user)
 
-        table = Table(
+        threads_table = Table(
             show_header=True,
             show_lines=True,
-            row_styles=row_style,
-            border_style=bordercol,
-            header_style=f"bold {col}",
+            row_styles=row_highlighting_style,
+            border_style=border_color,
+            header_style=f"bold {color}",
             width=112,
             box=box.ROUNDED,
         )
 
-        table.add_column("Author", width=16)
-        table.add_column("Message", style="dim", min_width=89)
+        threads_table.add_column("Author", width=16)
+        threads_table.add_column("Message", style="dim", min_width=89)
         # print(str(comment['notes'][0].get('body')))
         # print(comment['notes'][0].get('type', 'none'))
         for note in comment["notes"]:
-            table.add_row(note["author"]["name"], note["body"])
+            threads_table.add_row(note["author"]["name"], note["body"])
 
         if reply_needed:
-            table.add_row(
+            threads_table.add_row(
                 "Discussion link",
                 f"{mr['mr_data']['web_url']}#note_{comment['notes'][0]['id']}",
             )
 
-        console.print(table)
+        console.print(threads_table)
