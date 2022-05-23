@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 """
 A script to show you what threads in GitLab you've forgotten to respond to.
 
