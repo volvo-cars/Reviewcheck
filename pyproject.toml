@@ -1,14 +1,22 @@
 [tool.poetry]
 name = "reviewcheck"
 version = "0.1.0"
-description = ""
+description = "Tool to stay up to date with your reviews on GitLab – Don't let a comment slip you by"
 authors = ["Simon Bengtsson <simon.bengtsson.3@volvocars.com>"]
+license = "Apache-2.0 license"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.6"
+rich = "^12.4.2"
+requests = "^2.27.1"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+black = "^22.3.0"
+mypy = "^0.950"
+flake8 = "^4.0.1"
+isort = "^5.10.1"
+build = "^0.8.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
