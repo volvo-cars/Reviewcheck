@@ -65,4 +65,13 @@ class Cli:
             default=[],
             dest="ignore",
         )
+
+        subparsers = parser.add_subparsers(dest="command")
+
+        subparsers.add_parser(
+            "configure",
+            help="Interactively set up configuration file",
+            description="Asks for input to write to the configuration file.",
+        )
+
         return parser.parse_args()
