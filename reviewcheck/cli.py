@@ -1,6 +1,8 @@
 import argparse
 from argparse import RawTextHelpFormatter, Namespace
 
+import shtab
+
 
 class Cli:
     @staticmethod
@@ -24,6 +26,9 @@ class Cli:
         """,
             formatter_class=RawTextHelpFormatter,
         )
+
+        shtab.add_argument_to(parser, ["-s", "--print-completion"])
+
         parser.add_argument(
             "-a",
             "--all",
@@ -32,6 +37,7 @@ class Cli:
             default=False,
             dest="all",
         )
+
         parser.add_argument(
             "-u",
             "--user",
@@ -40,6 +46,7 @@ class Cli:
             default=False,
             dest="user",
         )
+
         parser.add_argument(
             "-f",
             "--fast-mode",
@@ -48,6 +55,7 @@ class Cli:
             default=False,
             dest="fast",
         )
+
         parser.add_argument(
             "-i",
             "--ignore",
