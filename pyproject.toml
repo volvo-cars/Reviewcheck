@@ -6,7 +6,7 @@ authors = ["Simon Bengtsson <simon.bengtsson.3@volvocars.com>"]
 license = "Apache-2.0 license"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 rich = "^12.4.2"
 requests = "^2.27.1"
 PyYAML = "^6.0"
