@@ -164,7 +164,7 @@ secret_token: <get a secret token from your settings in gitlab>
 user: <your username>
 ```
 """,
-    formatter_class=RawTextHelpFormatter
+    formatter_class=RawTextHelpFormatter,
 )
 parser.add_argument(
     "-a",
@@ -222,7 +222,10 @@ created_after = f"&created_after={three_weeks_ago}" if args.fast else ""
 project_ids = ["3996", "4913"]
 mr_pages = []
 with Progress(transient=True, expand=True) as progress:
-    gitlab_download_task = progress.add_task("[green]Downloading MR data...", start=False)
+    gitlab_download_task = progress.add_task(
+        "[green]Downloading MR data...",
+        start=False,
+    )
     for project in project_ids:
         merge_requests_data = json.loads(
             requests.get(
@@ -280,7 +283,11 @@ for id, mr in mrs.items():
     n_your_notes = len(discussion_data)
 
     n_response_required = len(
-        [1 for comment in discussion_data if comment["notes"][-1]["author"]["username"] != user]
+        [
+            1
+            for comment in discussion_data
+            if comment["notes"][-1]["author"]["username"] != user
+        ]
     )
 
     color = random.choice(colors)
@@ -322,7 +329,11 @@ for id, mr in mrs.items():
 
         border_color = f"{color}" if reply_needed else "white"
 
-        row_highlighting_style = get_rows_highlighting(comment["notes"], reply_needed, user)
+        row_highlighting_style = get_rows_highlighting(
+            comment["notes"],
+            reply_needed,
+            user,
+        )
 
         threads_table = Table(
             show_header=True,
