@@ -206,6 +206,8 @@ with open(config_path, "r") as f:
     config = yaml.safe_load(f)
 
 secret_token = config["secret_token"]
+api_url = config["api_url"]
+jira_url = config["jira_url"]
 
 user = config["user"]
 if args.user:
@@ -248,7 +250,7 @@ with Progress(transient=True, expand=True) as progress:
     for id, mr in all_data.items():
         all_data[id]["url"] = (
             f"{api_url}"
-            f"projects/{mr['project']}/merge_requests/{id}/discussions"
+            f"/projects/{mr['project']}/merge_requests/{id}/discussions"
             f"?per_page=500"
         )
 
@@ -306,7 +308,7 @@ for id, mr in all_data.items():
                 f"\nOpen discussions where you are involved: {n_your_notes}"
                 f"\nOpen discussions you need to respond (colored border): {n_response_required}"
                 f"\n\nGitLab: {mr['mr_data']['web_url']}"
-                f"\nJira:   {jira_url}{jira}"
+                f"\nJira:   {jira_url}/{jira}"
                 f"\n\n{mr['mr_data']['description']}"
             ),
             title=f"[bold {col}]{mr['mr_data']['title']} | !{mr['mr_data']['iid']} | {jira}",
