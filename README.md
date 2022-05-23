@@ -1,3 +1,5 @@
+![reviewcheck logo](reviewcheck-logo-short.png)
+
 # Reviewcheck
 
 Tool to stay up to date with your reviews on GitLab – Don't let a comment slip you by
