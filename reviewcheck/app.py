@@ -228,8 +228,8 @@ def run() -> int:
                 Text(
                     f"Open discussions: {n_notes}"
                     f"\nOpen discussions where you are involved: {n_your_notes}"
-                    f"\nOpen discussions you need to respond (colored border): "
-                    "{n_response_required}"
+                    "\nOpen discussions you need to respond (colored border): "
+                    f"{n_response_required}"
                     f"\n\nGitLab: {mr['mr_data']['web_url']}"
                     f"\nJira:   {UrlBuilder.construct_jira_link(jira_url, jira)}"
                     f"\n\n{mr['mr_data']['description']}"
