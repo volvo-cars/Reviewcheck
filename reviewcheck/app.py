@@ -119,8 +119,7 @@ def get_rows_highlighting(comment, needs_reply, uname):
 
 def run() -> int:
     args = Cli.parse_arguments()
-    config_path = Path.home() / ".config/reviewcheckrc"
-    with open(config_path, "r") as f:
+    with open(Constants.CONFIG_PATH, "r") as f:
         config = yaml.safe_load(f)
 
     secret_token = config["secret_token"]
@@ -207,7 +206,7 @@ def run() -> int:
             ]
         )
 
-        color = random.choice(Constants.colors)
+        color = random.choice(Constants.COLORS)
 
         if len(discussion_data) > 0:
             if n_response_required == 0 and not args.all:

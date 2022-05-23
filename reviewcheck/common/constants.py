@@ -1,5 +1,7 @@
+from pathlib import Path
+
 class Constants:
-    colors = [
+    COLORS = [
         "green",
         "yellow",
         "blue",
@@ -28,3 +30,5 @@ class Constants:
         "khaki1",
         "indian_red",
     ]
+
+    CONFIG_PATH = Path.home() / ".config" / "reviewcheckrc"
