@@ -16,7 +16,6 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import requests
-import yaml
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
@@ -27,6 +26,7 @@ from rich.text import Text
 from reviewcheck.cli import Cli
 from reviewcheck.common.constants import Constants
 from reviewcheck.common.url_builder import UrlBuilder
+from reviewcheck.config import Config
 
 console = Console()
 THREAD_POOL = 16
@@ -119,8 +119,7 @@ def get_rows_highlighting(comment, needs_reply, uname):
 
 def run() -> int:
     args = Cli.parse_arguments()
-    with open(Constants.CONFIG_PATH, "r") as f:
-        config = yaml.safe_load(f)
+    config = Config(args.command == "configure").get_configuration()
 
     secret_token = config["secret_token"]
     api_url = config["api_url"]
