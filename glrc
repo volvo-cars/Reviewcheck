@@ -1,0 +1,349 @@
+#! /usr/bin/env python3
+"""
+A script to show you what threads in GitLab you've forgotten to respond to.
+
+Your configuration file should be in .config/reviewcheckrc and contain the following:
+
+    secret_token: <get a secret token from your settings in gitlab>
+    user: <your username>
+
+Dependencies: rich
+"""
+import argparse
+import datetime
+import json
+import logging
+import random
+import re
+import time
+from argparse import RawTextHelpFormatter
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+import requests
+import yaml
+from rich import box
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import Progress
+from rich.table import Table
+from rich.text import Text
+
+console = Console()
+THREAD_POOL = 16
+
+# This is how to create a reusable connection pool with python requests.
+session = requests.Session()
+session.mount(
+    "https://",
+    requests.adapters.HTTPAdapter(
+        pool_maxsize=THREAD_POOL, max_retries=3, pool_block=True
+    ),
+)
+
+
+def get(get_data):
+    url, mr_id = get_data
+    response = session.get(url, headers={"PRIVATE-TOKEN": secret_token})
+    response_json = json.loads(response.content)
+    logging.info(
+        "request was completed in %s seconds [%s]",
+        response.elapsed.total_seconds(),
+        response.url,
+    )
+    if response.status_code != 200:
+        logging.error(
+            "request failed, error code %s [%s]", response.status_code, response.url
+        )
+    if 500 <= response.status_code < 600:
+        # server is overloaded? give it a break
+        time.sleep(5)
+
+    num_pages = int(response.headers["X-Total-Pages"])
+    for page in range(2, num_pages + 1):
+        response = session.get(
+            f"{url}&page={page}", headers={"PRIVATE-TOKEN": secret_token}
+        )
+        response_json += json.loads(response.content)
+        logging.info(
+            "request was completed in %s seconds [%s]",
+            response.elapsed.total_seconds(),
+            response.url,
+        )
+        if response.status_code != 200:
+            logging.error(
+                "request failed, error code %s [%s]", response.status_code, response.url
+            )
+        if 500 <= response.status_code < 600:
+            # server is overloaded? give it a break
+            time.sleep(5)
+
+    return response_json, mr_id
+
+
+def references_user(notes, uname):
+    for note in notes:
+        if ("@" + uname) in note["body"]:
+            return True
+
+
+def is_author(mr, notes, uname):
+    if mr["author"] == uname:
+        if notes[-1]["author"]["username"] != uname:
+            return True
+
+    return False
+
+
+def contains_user(notes, uname):
+    for note in notes:
+        if note["author"]["username"] == uname:
+            return True
+
+    return False
+
+
+def get_row_style(notes, needs_reply, uname):
+    """Messages after your own last message should be highlighted"""
+    n_replies = len(comment["notes"])
+    author_list = [n["author"]["username"] for n in notes]
+    if not needs_reply:
+        return [""] * (n_replies)
+    elif uname not in author_list:
+        return ["bold white not dim"] * (n_replies)
+    i_my_last_reply = n_replies - author_list[::-1].index(uname)
+    return [""] * (i_my_last_reply) + ["bold white not dim"] * (
+        n_replies - i_my_last_reply
+    )
+
+
+colors = [
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
+    "bright_black",
+    "bright_green",
+    "bright_yellow",
+    "bright_blue",
+    "bright_magenta",
+    "bright_cyan",
+    "bright_white",
+    "dark_cyan",
+    "turquoise4",
+    "spring_green1",
+    "slate_blue3",
+    "slate_blue3",
+    "light_pink4",
+    "medium_purple3",
+    "light_slate_blue",
+    "dark_goldenrod",
+    "dark_olive_green3",
+    "hot_pink3",
+    "thistle3",
+    "khaki1",
+    "indian_red",
+]
+
+parser = argparse.ArgumentParser(
+    description="""
+This script will tell you which discussions on GitLab you need to respond to.
+You will be shown the discussions from MRs where:
+
+- You are the author
+- Someone has replied to your comment but you haven't replied back
+- Someone has referenced your @username
+
+The script needs to be configured before you can use it. Add a ~/.config/reviewcheckrc
+with the following content:
+
+```
+secret_token: <get a secret token from your settings in gitlab>
+user: <your username>
+```
+""",
+    formatter_class=RawTextHelpFormatter
+)
+parser.add_argument(
+    "-a",
+    "--all",
+    help="Show all threads, even when you don't need to reply",
+    action="store_true",
+    default=False,
+    dest="all",
+)
+parser.add_argument(
+    "-u",
+    "--user",
+    help="Username whose reviews you want to analyze",
+    action="store",
+    default=False,
+    dest="user",
+)
+parser.add_argument(
+    "-f",
+    "--fast-mode",
+    help="Enables fast mode, only checking MRs created in the last three weeks",
+    action="store_true",
+    default=False,
+    dest="fast",
+)
+parser.add_argument(
+    "-i",
+    "--ignore",
+    help="Space separated list of MRs to ignore, e.g. '-i 373 371'",
+    action="store",
+    nargs="+",
+    default=[],
+    dest="ignore",
+)
+args = parser.parse_args()
+
+config_path = Path.home() / ".config/reviewcheckrc"
+with open(config_path, "r") as f:
+    config = yaml.safe_load(f)
+
+secret_token = config["secret_token"]
+
+user = config["user"]
+if args.user:
+    user = args.user
+user = user.upper()
+
+three_weeks_ago = (datetime.datetime.now() - datetime.timedelta(weeks=3)).isoformat()[
+    :-7
+] + "Z"
+created_after = f"&created_after={three_weeks_ago}" if args.fast else ""
+
+projects = ["3996", "4913"]
+base_data = []
+with Progress(transient=True, expand=True) as progress:
+    downloading = progress.add_task("[green]Downloading MR data...", start=False)
+    for project in projects:
+        merge_requests_data = json.loads(
+            requests.get(
+                f"{api_url}"
+                f"/projects/{project}/merge_requests"
+                f"?state=opened&per_page=500&sort=asc{created_after}",
+                headers={"PRIVATE-TOKEN": secret_token},
+            ).content
+        )
+        if isinstance(merge_requests_data, dict):
+            raise Exception(merge_requests_data)
+        else:
+            base_data += [
+                mr for mr in merge_requests_data if str(mr["iid"]) not in args.ignore
+            ]
+
+    all_data = {
+        mr["iid"]: {
+            "mr_data": mr,
+            "project": mr["project_id"],
+            "author": mr["author"]["username"],
+        }
+        for mr in base_data
+    }
+    for id, mr in all_data.items():
+        all_data[id]["url"] = (
+            f"{api_url}"
+            f"projects/{mr['project']}/merge_requests/{id}/discussions"
+            f"?per_page=500"
+        )
+
+    with ThreadPoolExecutor(max_workers=THREAD_POOL) as executor:
+        # wrap in a list() to wait for all requests to complete
+        progress.start_task(downloading)
+        progress.update(downloading, total=len(all_data))
+        for response_json, mr_id in executor.map(
+            get, [(mr["url"], id) for id, mr in all_data.items()]
+        ):
+            all_data[mr_id]["discussion_data"] = response_json
+            progress.update(downloading, advance=1)
+
+
+for id, mr in all_data.items():
+    data = mr["discussion_data"]
+    data = [c for c in data if "resolved" in c["notes"][0]]
+    data = [c for c in data if not c["notes"][0]["resolved"]]
+    n_notes = len(data)
+    data = [
+        c
+        for c in data
+        if contains_user(c["notes"], user)
+        or references_user(c["notes"], user)
+        or is_author(mr, c["notes"], user)
+    ]
+    n_your_notes = len(data)
+    # pprint(data[0])
+
+    n_response_required = len(
+        [1 for comment in data if comment["notes"][-1]["author"]["username"] != user]
+    )
+
+    col = random.choice(colors)
+
+    if len(data) > 0:
+        if n_response_required == 0 and not args.all:
+            continue
+        print()
+
+        # Parse the VIRA ticket number
+        jira_regex = re.compile(r".*JIRA: (.*)(\\n)*")
+        jira_match = jira_regex.match(mr["mr_data"]["description"].split("\n")[-1])
+        jira = None
+        if jira_match:
+            jira = jira_match.group(1)
+            already_a_link_regex = re.compile(r"\[(.*)\].*")
+            already_a_link = already_a_link_regex.match(jira)
+            if already_a_link:
+                jira = already_a_link.group(1)
+
+        panel = Panel(
+            Text(
+                f"Open discussions: {n_notes}"
+                f"\nOpen discussions where you are involved: {n_your_notes}"
+                f"\nOpen discussions you need to respond (colored border): {n_response_required}"
+                f"\n\nGitLab: {mr['mr_data']['web_url']}"
+                f"\nJira:   {jira_url}{jira}"
+                f"\n\n{mr['mr_data']['description']}"
+            ),
+            title=f"[bold {col}]{mr['mr_data']['title']} | !{mr['mr_data']['iid']} | {jira}",
+            width=112,
+        )
+        console.print(panel)
+
+    for comment in data:
+        reply_needed = False
+        if comment["notes"][-1]["author"]["username"] != user:
+            reply_needed = True
+
+        bordercol = f"{col}" if reply_needed else "white"
+
+        row_style = get_row_style(comment["notes"], reply_needed, user)
+
+        table = Table(
+            show_header=True,
+            show_lines=True,
+            row_styles=row_style,
+            border_style=bordercol,
+            header_style=f"bold {col}",
+            width=112,
+            box=box.ROUNDED,
+        )
+
+        table.add_column("Author", width=16)
+        table.add_column("Message", style="dim", min_width=89)
+        # print(str(comment['notes'][0].get('body')))
+        # print(comment['notes'][0].get('type', 'none'))
+        for note in comment["notes"]:
+            table.add_row(note["author"]["name"], note["body"])
+
+        if reply_needed:
+            table.add_row(
+                "Discussion link",
+                f"{mr['mr_data']['web_url']}#note_{comment['notes'][0]['id']}",
+            )
+
+        console.print(table)
