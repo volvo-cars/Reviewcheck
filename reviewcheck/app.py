@@ -17,6 +17,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from reviewcheck.cli import Cli
+from reviewcheck.common.constants import Constants
 
 import requests
 import yaml
@@ -116,37 +117,6 @@ def get_rows_highlighting(comment, needs_reply, uname):
     )
 
 
-colors = [
-    "green",
-    "yellow",
-    "blue",
-    "magenta",
-    "cyan",
-    "white",
-    "bright_black",
-    "bright_green",
-    "bright_yellow",
-    "bright_blue",
-    "bright_magenta",
-    "bright_cyan",
-    "bright_white",
-    "dark_cyan",
-    "turquoise4",
-    "spring_green1",
-    "slate_blue3",
-    "slate_blue3",
-    "light_pink4",
-    "medium_purple3",
-    "light_slate_blue",
-    "dark_goldenrod",
-    "dark_olive_green3",
-    "hot_pink3",
-    "thistle3",
-    "khaki1",
-    "indian_red",
-]
-
-
 def run() -> int:
     args = Cli.parse_arguments()
     config_path = Path.home() / ".config/reviewcheckrc"
@@ -237,7 +207,7 @@ def run() -> int:
             ]
         )
 
-        color = random.choice(colors)
+        color = random.choice(Constants.colors)
 
         if len(discussion_data) > 0:
             if n_response_required == 0 and not args.all:
