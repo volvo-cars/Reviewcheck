@@ -14,7 +14,7 @@ run:
 
 lint:
 	${FLAKE8}
-	${ISORT} --check-only --diff .
+	${ISORT} --color --check-only --diff .
 	${BLACK} --check --diff --color .
 
 format:
