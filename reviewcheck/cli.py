@@ -1,5 +1,5 @@
 import argparse
-from argparse import RawTextHelpFormatter, Namespace
+from argparse import Namespace, RawTextHelpFormatter
 
 import shtab
 
@@ -16,8 +16,8 @@ class Cli:
         - Someone has replied to your comment but you haven't replied back
         - Someone has referenced your @username
 
-        The script needs to be configured before you can use it. Add a ~/.config/reviewcheckrc
-        with the following content:
+        The script needs to be configured before you can use it. Add a
+        ~/.config/reviewcheckrc with the following content:
 
         ```
         secret_token: <get a secret token from your settings in gitlab>

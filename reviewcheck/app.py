@@ -8,16 +8,12 @@ Your configuration file should be in .config/reviewcheckrc and contain the follo
 
 Dependencies: rich
 """
-import datetime
 import json
 import logging
 import random
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
-from reviewcheck.cli import Cli
-from reviewcheck.common.constants import Constants
 
 import requests
 import yaml
@@ -27,6 +23,10 @@ from rich.panel import Panel
 from rich.progress import Progress
 from rich.table import Table
 from rich.text import Text
+
+from reviewcheck.cli import Cli
+from reviewcheck.common.constants import Constants
+from reviewcheck.common.url_builder import UrlBuilder
 
 console = Console()
 THREAD_POOL = 16
@@ -131,11 +131,6 @@ def run() -> int:
         user = args.user
     user = user.upper()
 
-    three_weeks_ago = (datetime.datetime.now() - datetime.timedelta(weeks=3)).isoformat()[
-        :-7
-    ] + "Z"
-    created_after = f"&created_after={three_weeks_ago}" if args.fast else ""
-
     project_ids = ["3996", "4913"]
     mr_pages = []
     with Progress(transient=True, expand=True) as progress:
@@ -146,9 +141,11 @@ def run() -> int:
         for project in project_ids:
             merge_requests_data = json.loads(
                 requests.get(
-                    f"{api_url}"
-                    f"/projects/{project}/merge_requests"
-                    f"?state=opened&per_page=500&sort=asc{created_after}",
+                    UrlBuilder.construct_project_mr_list_url(
+                        api_url,
+                        project,
+                        args.fast,
+                    ),
                     headers={"PRIVATE-TOKEN": secret_token},
                 ).content
             )
@@ -156,7 +153,9 @@ def run() -> int:
                 raise Exception(merge_requests_data)
             else:
                 mr_pages += [
-                    mr for mr in merge_requests_data if str(mr["iid"]) not in args.ignore
+                    mr
+                    for mr in merge_requests_data
+                    if str(mr["iid"]) not in args.ignore
                 ]
 
         mrs = {
@@ -168,10 +167,10 @@ def run() -> int:
             for mr in mr_pages
         }
         for id, mr in mrs.items():
-            mrs[id]["url"] = (
-                f"{api_url}"
-                f"/projects/{mr['project']}/merge_requests/{id}/discussions"
-                f"?per_page=500"
+            mrs[id]["url"] = UrlBuilder.construct_download_all_merge_requests_url(
+                api_url,
+                mr["project"],
+                id,
             )
 
         with ThreadPoolExecutor(max_workers=THREAD_POOL) as executor:
@@ -179,7 +178,8 @@ def run() -> int:
             progress.start_task(gitlab_download_task)
             progress.update(gitlab_download_task, total=len(mrs))
             for response_json, mr_id in executor.map(
-                download_gitlab_data, [(mr["url"], id, secret_token) for id, mr in mrs.items()]
+                download_gitlab_data,
+                [(mr["url"], id, secret_token) for id, mr in mrs.items()],
             ):
                 mrs[mr_id]["discussion_data"] = response_json
                 progress.update(gitlab_download_task, advance=1)
@@ -228,12 +228,16 @@ def run() -> int:
                 Text(
                     f"Open discussions: {n_notes}"
                     f"\nOpen discussions where you are involved: {n_your_notes}"
-                    f"\nOpen discussions you need to respond (colored border): {n_response_required}"
+                    f"\nOpen discussions you need to respond (colored border): "
+                    "{n_response_required}"
                     f"\n\nGitLab: {mr['mr_data']['web_url']}"
-                    f"\nJira:   {jira_url}/{jira}"
+                    f"\nJira:   {UrlBuilder.construct_jira_link(jira_url, jira)}"
                     f"\n\n{mr['mr_data']['description']}"
                 ),
-                title=f"[bold {color}]{mr['mr_data']['title']} | !{mr['mr_data']['iid']} | {jira}",
+                title=(
+                    f"[bold {color}]{mr['mr_data']['title']} | "
+                    f"!{mr['mr_data']['iid']} | {jira}"
+                ),
                 width=112,
             )
             console.print(mr_info_header)

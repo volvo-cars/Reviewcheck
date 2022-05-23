@@ -96,7 +96,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -388,7 +388,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "c46646c4b3eeff255a1227122c3d208dc12c1dbf77b53e8ddeb90d7f7a66c42f"
+content-hash = "bf4b3553d6439988de24c6063e87a4105858237a8bfc6531e92e99154610266b"
 
 [metadata.files]
 atomicwrites = [
