@@ -1,15 +1,1 @@
-# You can use this CODEOWNERS file to define individuals or teams that are 
-# responsible for code in the repository.
-
-# A CODEOWNERS file uses a pattern that follows most of the same rules used in
-# gitignore files, with some exceptions. The pattern is followed by one or more 
-# GitHub usernames or team names using the standard @username or @org/team-name 
-# format. You can also use email addresses if you prefer. Each line is a file 
-# pattern followed by one or more owners.
-#
-# Example 1: @global-owner1 @global-owner2
-# Example 2: .js @js-owner
-
-# For more information, see https://docs.github.com/en/repositories/managing-
-#   your-repositorys-settings-and-features/customizing-your-repository/
-#   about-code-owners.
+*   @Simon-1-1  @plaos
