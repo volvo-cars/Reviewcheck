@@ -13,19 +13,18 @@ reviewcheck = "reviewcheck.app:run"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-rich = "^12.4.2"
-requests = "^2.27.1"
-PyYAML = "^6.0"
-shtab = "^1.5.4"
-colorama = "^0.4.4"
+rich = {version = "^12.4.4", python = "3.8"}
+requests = {version = "^2.27.1", python = "3.8"}
+PyYAML = {version = "^6.0", python = "3.8"}
+shtab = {version = "^1.5.4", python = "3.8"}
+colorama = {version = "^0.4.4", python = "3.8"}
 
 [tool.poetry.dev-dependencies]
-black = "^22.3.0"
-mypy = "^0.950"
-flake8 = "^4.0.1"
-isort = "^5.10.1"
-build = "^0.8.0"
-pytest = "^7.1.2"
+black = {version = "^22.3.0", python = "3.8"}
+mypy = {version = "^0.950", python = "3.8"}
+flake8 = {version = "^4.0.1", python = "3.8"}
+isort = {version = "^5.10.1", python = "3.8"}
+pytest = {version = "^7.1.2", python = "3.8"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

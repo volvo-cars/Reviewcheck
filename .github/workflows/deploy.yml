@@ -11,30 +11,29 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: pss-cyberpunk
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install poetry
-        run: pipx install poetry
 
       - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
           cache: "poetry"
 
+      - run: pip3 install poetry
+
+      - run: poetry install
+
+      - run: poetry build
+
       - uses: actions/upload-artifact@v3
         with:
           name: reviewcheck-package
           path: dist/reviewcheck-*.tar.gz
 
-      - run: poetry install
-
-      - run: make build
-
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: pss-cyberpunk
 
     needs: build
 
@@ -47,7 +46,7 @@ jobs:
 
       - run: |
           curl -sSf -H "X-JFrog-Art-Api:$ARTIFACTORY_TOKEN" -X PUT \
-          -T reviewcheck-*.tar.gz "$ARTIFACTORY_BASE_URL/"
+          -T reviewcheck-*.tar.gz "$ARTIFACTORY_BASE_URL/$(poetry version -s)/"
         env:
           ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
           ARTIFACTORY_BASE_URL: ${{ secrets.ARTIFACTORY_BASE_URL }}

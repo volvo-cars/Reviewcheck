@@ -12,55 +12,62 @@ permissions:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: pss-cyberpunk
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install poetry
-        run: pipx install poetry
-
       - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
-          cache: "poetry"
+          # cache: "poetry"
+
+      - run: pip3 install poetry
+
+      - run: poetry config virtualenvs.create false
 
       - run: poetry install
 
-      - run: make lint
+      - run: poetry run black --check --diff --color .
+
+      - run: poetry run isort --check-only --diff .
+
+      - run: poetry run flake8
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: pss-cyberpunk
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install poetry
-        run: pipx install poetry
 
       - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
           cache: "poetry"
 
+      - run: pip3 install poetry
+
+      - run: poetry config virtualenvs.create false
+
       - run: poetry install
 
-      - run: poetry run pytest
+      - run: poetry run pytest tests/
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: pss-cyberpunk
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install poetry
-        run: pipx install poetry
 
       - uses: actions/setup-python@v3
         with:
           python-version: "3.8"
           cache: "poetry"
 
+      - run: pip3 install poetry
+
+      - run: poetry config virtualenvs.create false
+
       - run: poetry install
 
-      - run: make build
+      - run: poetry build
