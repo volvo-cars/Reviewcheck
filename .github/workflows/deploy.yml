@@ -1,0 +1,51 @@
+---
+name: Reviewcheck pipeline
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: reviewcheck-package
+          path: dist/reviewcheck-*.tar.gz
+
+      - run: poetry install
+
+      - run: make build
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: reviewcheck-package
+
+      - run: |
+          curl -sSf -H "X-JFrog-Art-Api:$ARTIFACTORY_TOKEN" -X PUT \
+          -T reviewcheck-*.tar.gz "$ARTIFACTORY_BASE_URL/"
+        env:
+          ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+          ARTIFACTORY_BASE_URL: ${{ secrets.ARTIFACTORY_BASE_URL }}
