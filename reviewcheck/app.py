@@ -117,9 +117,35 @@ def get_rows_highlighting(comment, needs_reply, uname):
     )
 
 
+def configure() -> int:
+    Config(True).setup_configuration()
+    return 0
+
+
 def run() -> int:
     args = Cli.parse_arguments()
-    config = Config(args.command == "configure").get_configuration()
+
+    command_palette = {
+        "configure": configure,
+    }
+
+    if args.command:
+        func = command_palette.get(args.command)
+
+        if func is not None:
+            return func()
+        else:
+            print(
+                f"'{args.command} is not a valid command, please see "
+                "`reviewcheck --help`."
+            )
+            return 127
+
+    config = Config(False).get_configuration()
+
+    if config is None:
+        print(f"Could not read configuration from {str(Constants.CONFIG_PATH)}.")
+        return 1
 
     secret_token = config["secret_token"]
     api_url = config["api_url"]

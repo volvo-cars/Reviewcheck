@@ -1,3 +1,5 @@
+from typing import Optional
+
 import yaml
 
 from reviewcheck.common.constants import Constants
@@ -11,16 +13,7 @@ class Config:
     def __init__(self, reconfigure: bool):
         self.reconfigure = reconfigure
 
-    def get_configuration(self) -> dict:
-        """
-        Reads the configuration file into a dictionary. If the configuration file does
-        not exist, queries the user for information and writes it.
-
-        :param reconfigure: If True, forces reconfiguration.
-
-        :return: A dict containing the contents of the configuration file.
-        """
-
+    def setup_configuration(self) -> None:
         # Only attempt to write the configuration file if it does not already exist
         if self.reconfigure or not Constants.CONFIG_PATH.exists():
             Constants.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -51,5 +44,18 @@ class Config:
             with open(Constants.CONFIG_PATH, "w") as f:
                 f.write(yaml.safe_dump(config_object))
 
-        with open(Constants.CONFIG_PATH, "r") as f:
-            return yaml.safe_load(f)
+    def get_configuration(self) -> Optional[dict]:
+        """
+        Reads the configuration file into a dictionary. If the configuration file does
+        not exist, queries the user for information and writes it.
+
+        :return: A dict containing the contents of the configuration file, or None if
+        the file does not exist.
+        """
+
+        self.setup_configuration()
+        try:
+            with open(Constants.CONFIG_PATH, "r") as f:
+                return yaml.safe_load(f)
+        except FileNotFoundError:
+            return None
