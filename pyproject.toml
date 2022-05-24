@@ -2,8 +2,11 @@
 name = "reviewcheck"
 version = "0.1.0"
 description = "Tool to stay up to date with your reviews on GitLab – Don't let a comment slip you by"
-authors = ["Simon Bengtsson <simon.bengtsson.3@volvocars.com>"]
+authors = ["Simon Bengtsson <simon.bengtsson.3@volvocars.com>", "Pontus Laos <pontus.laos@volvocars.com>"]
 license = "Apache-2.0 license"
+readme = "README.md"
+homepage = "https://github.com/volvo-cars/Reviewcheck"
+keywords = ["code review", "gitlab"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
