@@ -1,5 +1,5 @@
 ---
-name: Reviewcheck pipeline
+name: Deploy
 
 on:
   push:
@@ -35,6 +35,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+
+    needs: build
 
     steps:
       - uses: actions/checkout@v3

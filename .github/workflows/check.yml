@@ -1,5 +1,5 @@
 ---
-name: Reviewcheck pipeline
+name: Check
 
 on:
   push:
@@ -29,24 +29,6 @@ jobs:
 
       - run: make lint
 
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.8"
-          cache: "poetry"
-
-      - run: poetry install
-
-      - run: make build
-
   test:
     runs-on: ubuntu-latest
 
@@ -64,3 +46,21 @@ jobs:
       - run: poetry install
 
       - run: poetry run pytest
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+          cache: "poetry"
+
+      - run: poetry install
+
+      - run: make build
