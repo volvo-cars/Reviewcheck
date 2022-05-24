@@ -8,6 +8,9 @@ readme = "README.md"
 homepage = "https://github.com/volvo-cars/Reviewcheck"
 keywords = ["code review", "gitlab"]
 
+[tool.poetry.scripts]
+reviewcheck = "reviewcheck.app:run"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 rich = "^12.4.2"

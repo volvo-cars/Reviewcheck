@@ -1,4 +1,5 @@
 RUN := poetry run
+BUILD := poetry build
 TARGET := reviewcheck
 
 BLACK := ${RUN} black
@@ -8,6 +9,9 @@ PYTEST := ${RUN} pytest
 PYTHON := ${RUN} python3
 
 all: run
+
+build:
+	${BUILD}
 
 run:
 	${PYTHON} -m ${TARGET}
