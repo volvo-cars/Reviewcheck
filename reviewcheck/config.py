@@ -35,12 +35,17 @@ class Config:
             username = input("Username: ")
             api_url = input("API URL: ")
             jira_url = input("Jira URL: ")
+            project_ids = input("Project IDs (space-separated): ")
+
+            if project_ids:
+                project_ids = [int(i) for i in project_ids.split(" ")]
 
             config_object = {
                 "secret_token": token,
                 "user": username,
                 "api_url": api_url,
                 "jira_url": jira_url,
+                "project_ids": project_ids,
             }
 
             with open(Constants.CONFIG_PATH, "w") as f:

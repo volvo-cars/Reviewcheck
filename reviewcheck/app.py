@@ -124,13 +124,13 @@ def run() -> int:
     secret_token = config["secret_token"]
     api_url = config["api_url"]
     jira_url = config["jira_url"]
+    project_ids = config["project_ids"]
 
     user = config["user"]
     if args.user:
         user = args.user
     user = user.upper()
 
-    project_ids = ["3996", "4913"]
     mr_pages = []
     with Progress(transient=True, expand=True) as progress:
         gitlab_download_task = progress.add_task(
