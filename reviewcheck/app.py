@@ -1,12 +1,7 @@
 """
 A script to show you what threads in GitLab you've forgotten to respond to.
 
-Your configuration file should be in .config/reviewcheckrc and contain the following:
-
-    secret_token: <get a secret token from your settings in gitlab>
-    user: <your username>
-
-Dependencies: rich
+You have to configure the script before running it by running reviewcheck --configure
 """
 import json
 import logging
@@ -157,152 +152,165 @@ def run() -> int:
         user = args.user
     user = user.upper()
 
-    mr_pages = []
-    with Progress(transient=True, expand=True) as progress:
-        gitlab_download_task = progress.add_task(
-            "[green]Downloading MR data...",
-            start=False,
-        )
-        for project in project_ids:
-            merge_requests_data = json.loads(
-                requests.get(
-                    UrlBuilder.construct_project_mr_list_url(
-                        api_url,
-                        project,
-                        args.fast,
-                    ),
-                    headers={"PRIVATE-TOKEN": secret_token},
-                ).content
+    while True:
+        mr_pages = []
+        with Progress(transient=True, expand=True) as progress:
+            gitlab_download_task = progress.add_task(
+                "[green]Downloading MR data...",
+                start=False,
             )
-            if isinstance(merge_requests_data, dict):
-                raise Exception(merge_requests_data)
-            else:
-                mr_pages += [
-                    mr
-                    for mr in merge_requests_data
-                    if str(mr["iid"]) not in args.ignore
-                ]
+            for project in project_ids:
+                merge_requests_data = json.loads(
+                    requests.get(
+                        UrlBuilder.construct_project_mr_list_url(
+                            api_url,
+                            project,
+                            args.fast,
+                        ),
+                        headers={"PRIVATE-TOKEN": secret_token},
+                    ).content
+                )
+                if isinstance(merge_requests_data, dict):
+                    raise Exception(merge_requests_data)
+                else:
+                    mr_pages += [
+                        mr
+                        for mr in merge_requests_data
+                        if str(mr["iid"]) not in args.ignore
+                    ]
 
-        mrs = {
-            mr["iid"]: {
-                "mr_data": mr,
-                "project": mr["project_id"],
-                "author": mr["author"]["username"],
+            mrs = {
+                mr["iid"]: {
+                    "mr_data": mr,
+                    "project": mr["project_id"],
+                    "author": mr["author"]["username"],
+                }
+                for mr in mr_pages
             }
-            for mr in mr_pages
-        }
-        for id, mr in mrs.items():
-            mrs[id]["url"] = UrlBuilder.construct_download_all_merge_requests_url(
-                api_url,
-                mr["project"],
-                id,
-            )
-
-        with ThreadPoolExecutor(max_workers=THREAD_POOL) as executor:
-            # wrap in a list() to wait for all requests to complete
-            progress.start_task(gitlab_download_task)
-            progress.update(gitlab_download_task, total=len(mrs))
-            for response_json, mr_id in executor.map(
-                download_gitlab_data,
-                [(mr["url"], id, secret_token) for id, mr in mrs.items()],
-            ):
-                mrs[mr_id]["discussion_data"] = response_json
-                progress.update(gitlab_download_task, advance=1)
-
-    for id, mr in mrs.items():
-        discussion_data = mr["discussion_data"]
-        discussion_data = [c for c in discussion_data if "resolved" in c["notes"][0]]
-        discussion_data = [c for c in discussion_data if not c["notes"][0]["resolved"]]
-        n_notes = len(discussion_data)
-        discussion_data = [
-            c
-            for c in discussion_data
-            if is_user_participating_in_thread(c["notes"], user)
-            or is_user_referenced_in_thread(c["notes"], user)
-            or is_user_author_of_thread(mr, c["notes"], user)
-        ]
-        n_your_notes = len(discussion_data)
-
-        n_response_required = len(
-            [
-                1
-                for comment in discussion_data
-                if comment["notes"][-1]["author"]["username"] != user
-            ]
-        )
-
-        color = random.choice(Constants.COLORS)
-
-        if len(discussion_data) > 0:
-            if n_response_required == 0 and not args.all:
-                continue
-            print()
-
-            # Parse the VIRA ticket number
-            jira_regex = re.compile(r".*JIRA: (.*)(\\n)*")
-            jira_match = jira_regex.match(mr["mr_data"]["description"].split("\n")[-1])
-            jira = None
-            if jira_match:
-                jira = jira_match.group(1)
-                already_a_link_regex = re.compile(r"\[(.*)\].*")
-                already_a_link = already_a_link_regex.match(jira)
-                if already_a_link:
-                    jira = already_a_link.group(1)
-
-            mr_info_header = Panel(
-                Text(
-                    f"Open discussions: {n_notes}"
-                    f"\nOpen discussions where you are involved: {n_your_notes}"
-                    "\nOpen discussions you need to respond (colored border): "
-                    f"{n_response_required}"
-                    f"\n\nGitLab: {mr['mr_data']['web_url']}"
-                    f"\nJira:   {UrlBuilder.construct_jira_link(jira_url, jira)}"
-                    f"\n\n{mr['mr_data']['description']}"
-                ),
-                title=(
-                    f"[bold {color}]{mr['mr_data']['title']} | "
-                    f"!{mr['mr_data']['iid']} | {jira}"
-                ),
-                width=112,
-            )
-            console.print(mr_info_header)
-
-        for comment in discussion_data:
-            reply_needed = False
-            if comment["notes"][-1]["author"]["username"] != user:
-                reply_needed = True
-
-            border_color = f"{color}" if reply_needed else "white"
-
-            row_highlighting_style = get_rows_highlighting(
-                comment,
-                reply_needed,
-                user,
-            )
-
-            threads_table = Table(
-                show_header=True,
-                show_lines=True,
-                row_styles=row_highlighting_style,
-                border_style=border_color,
-                header_style=f"bold {color}",
-                width=112,
-                box=box.ROUNDED,
-            )
-
-            threads_table.add_column("Author", width=16)
-            threads_table.add_column("Message", style="dim", min_width=89)
-            # print(str(comment['notes'][0].get('body')))
-            # print(comment['notes'][0].get('type', 'none'))
-            for note in comment["notes"]:
-                threads_table.add_row(note["author"]["name"], note["body"])
-
-            if reply_needed:
-                threads_table.add_row(
-                    "Discussion link",
-                    f"{mr['mr_data']['web_url']}#note_{comment['notes'][0]['id']}",
+            for id, mr in mrs.items():
+                mrs[id]["url"] = UrlBuilder.construct_download_all_merge_requests_url(
+                    api_url,
+                    mr["project"],
+                    id,
                 )
 
-            console.print(threads_table)
+            with ThreadPoolExecutor(max_workers=THREAD_POOL) as executor:
+                # wrap in a list() to wait for all requests to complete
+                progress.start_task(gitlab_download_task)
+                progress.update(gitlab_download_task, total=len(mrs))
+                for response_json, mr_id in executor.map(
+                    download_gitlab_data,
+                    [(mr["url"], id, secret_token) for id, mr in mrs.items()],
+                ):
+                    mrs[mr_id]["discussion_data"] = response_json
+                    progress.update(gitlab_download_task, advance=1)
+
+        for id, mr in mrs.items():
+            discussion_data = mr["discussion_data"]
+            discussion_data = [
+                c for c in discussion_data if "resolved" in c["notes"][0]
+            ]
+            discussion_data = [
+                c for c in discussion_data if not c["notes"][0]["resolved"]
+            ]
+            n_notes = len(discussion_data)
+            discussion_data = [
+                c
+                for c in discussion_data
+                if is_user_participating_in_thread(c["notes"], user)
+                or is_user_referenced_in_thread(c["notes"], user)
+                or is_user_author_of_thread(mr, c["notes"], user)
+            ]
+            n_your_notes = len(discussion_data)
+
+            n_response_required = len(
+                [
+                    1
+                    for comment in discussion_data
+                    if comment["notes"][-1]["author"]["username"] != user
+                ]
+            )
+
+            color = random.choice(Constants.COLORS)
+
+            if len(discussion_data) > 0:
+                if n_response_required == 0 and not args.all:
+                    continue
+                print()
+
+                # Parse the VIRA ticket number
+                jira_regex = re.compile(r".*JIRA: (.*)(\\n)*")
+                jira_match = jira_regex.match(
+                    mr["mr_data"]["description"].split("\n")[-1]
+                )
+                jira = None
+                if jira_match:
+                    jira = jira_match.group(1)
+                    already_a_link_regex = re.compile(r"\[(.*)\].*")
+                    already_a_link = already_a_link_regex.match(jira)
+                    if already_a_link:
+                        jira = already_a_link.group(1)
+
+                mr_info_header = Panel(
+                    Text(
+                        f"Open discussions: {n_notes}"
+                        f"\nOpen discussions where you are involved: {n_your_notes}"
+                        "\nOpen discussions you need to respond (colored border): "
+                        f"{n_response_required}"
+                        f"\n\nGitLab: {mr['mr_data']['web_url']}"
+                        f"\nJira:   {UrlBuilder.construct_jira_link(jira_url, jira)}"
+                        f"\n\n{mr['mr_data']['description']}"
+                    ),
+                    title=(
+                        f"[bold {color}]{mr['mr_data']['title']} | "
+                        f"!{mr['mr_data']['iid']} | {jira}"
+                    ),
+                    width=112,
+                )
+                console.print(mr_info_header)
+
+            for comment in discussion_data:
+                reply_needed = False
+                if comment["notes"][-1]["author"]["username"] != user:
+                    reply_needed = True
+
+                border_color = f"{color}" if reply_needed else "white"
+
+                row_highlighting_style = get_rows_highlighting(
+                    comment,
+                    reply_needed,
+                    user,
+                )
+
+                threads_table = Table(
+                    show_header=True,
+                    show_lines=True,
+                    row_styles=row_highlighting_style,
+                    border_style=border_color,
+                    header_style=f"bold {color}",
+                    width=112,
+                    box=box.ROUNDED,
+                )
+
+                threads_table.add_column("Author", width=16)
+                threads_table.add_column("Message", style="dim", min_width=89)
+                # print(str(comment['notes'][0].get('body')))
+                # print(comment['notes'][0].get('type', 'none'))
+                for note in comment["notes"]:
+                    threads_table.add_row(note["author"]["name"], note["body"])
+
+                if reply_needed:
+                    threads_table.add_row(
+                        "Discussion link",
+                        f"{mr['mr_data']['web_url']}#note_{comment['notes'][0]['id']}",
+                    )
+
+                console.print(threads_table)
+
+        if args.refresh_time is None:
+            break
+        else:
+            time.sleep(args.refresh_time * 60)
+            print("\n" * 30)
 
     return 0

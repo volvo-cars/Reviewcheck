@@ -6,6 +6,18 @@ import shtab
 
 class Cli:
     @staticmethod
+    def check_positive_int(value: str) -> int:
+        try:
+            ivalue = int(value)
+        except Exception:
+            raise argparse.ArgumentTypeError("Flag argument must be a positive integer")
+
+        if ivalue > 0:
+            return ivalue
+        else:
+            raise argparse.ArgumentTypeError("Flag argument must be a positive integer")
+
+    @staticmethod
     def parse_arguments() -> Namespace:
         parser = argparse.ArgumentParser(
             description="""
@@ -64,6 +76,16 @@ class Cli:
             nargs="+",
             default=[],
             dest="ignore",
+        )
+
+        parser.add_argument(
+            "-r",
+            "--refresh",
+            help="If set, data will be refreshed at an interval specified in minutes",
+            type=Cli.check_positive_int,
+            action="store",
+            default=None,
+            dest="refresh_time",
         )
 
         subparsers = parser.add_subparsers(dest="command")
