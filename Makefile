@@ -17,9 +17,9 @@ run:
 	${PYTHON} -m ${TARGET}
 
 lint:
-	${FLAKE8}
-	${ISORT} --color --check-only --diff .
 	${BLACK} --check --diff --color .
+	${ISORT} --color --check-only --diff .
+	${FLAKE8}
 
 format:
 	${ISORT} .
