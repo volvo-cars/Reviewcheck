@@ -8,6 +8,7 @@ import logging
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict, Optional
 
 import requests
 from rich import box
@@ -116,6 +117,37 @@ def configure() -> int:
     return 0
 
 
+def get_info_box_title(
+    mr: Dict[str, Any],
+    jira_ticket_number: Optional[str],
+    color: str,
+) -> str:
+    return (
+        f"[bold {color}]{mr['mr_data']['title']} | "
+        f"!{mr['mr_data']['iid']} | {jira_ticket_number}"
+    )
+
+
+def get_info_box_content(
+    mr: Dict[str, Any],
+    jira_url: str,
+    jira: Optional[str],
+    n_all_notes: int,
+    n_your_notes: int,
+    n_response_required: int,
+) -> str:
+    return (
+        f"Open discussions: {n_all_notes}"
+        f"\nOpen discussions where you are involved: {n_your_notes}"
+        "\nOpen discussions you need to respond (colored border): "
+        f"{n_response_required}"
+        f"\n\nGitLab link:   {mr['mr_data']['web_url']}"
+        f"\nJira link:     {UrlBuilder.construct_jira_link(jira_url, jira)}"
+        f"\nSource branch: {mr['mr_data']['source_branch']}"
+        f"\n\n{mr['mr_data']['description']}"
+    )
+
+
 def run() -> int:
     args = Cli.parse_arguments()
 
@@ -212,7 +244,7 @@ def run() -> int:
             discussion_data = [
                 c for c in discussion_data if not c["notes"][0]["resolved"]
             ]
-            n_notes = len(discussion_data)
+            n_all_notes = len(discussion_data)
             discussion_data = [
                 c
                 for c in discussion_data
@@ -244,27 +276,25 @@ def run() -> int:
                 )
                 jira = None
                 if jira_match:
-                    jira = jira_match.group(1)
+                    jira = str(jira_match.group(1))
                     already_a_link_regex = re.compile(r"\[(.*)\].*")
                     already_a_link = already_a_link_regex.match(jira)
                     if already_a_link:
-                        jira = already_a_link.group(1)
+                        jira = str(already_a_link.group(1))
 
                 mr_info_header = Panel(
                     Text(
-                        f"Open discussions: {n_notes}"
-                        f"\nOpen discussions where you are involved: {n_your_notes}"
-                        "\nOpen discussions you need to respond (colored border): "
-                        f"{n_response_required}"
-                        f"\n\nGitLab: {mr['mr_data']['web_url']}"
-                        f"\nJira:   {UrlBuilder.construct_jira_link(jira_url, jira)}"
-                        f"\n\n{mr['mr_data']['description']}"
+                        get_info_box_content(
+                            mr,
+                            jira_url,
+                            jira,
+                            n_all_notes,
+                            n_your_notes,
+                            n_response_required,
+                        )
                     ),
-                    title=(
-                        f"[bold {color}]{mr['mr_data']['title']} | "
-                        f"!{mr['mr_data']['iid']} | {jira}"
-                    ),
-                    width=112,
+                    title=get_info_box_title(mr, jira, color),
+                    width=Constants.TUI_MAX_WIDTH,
                 )
                 console.print(mr_info_header)
 
@@ -287,14 +317,18 @@ def run() -> int:
                     row_styles=row_highlighting_style,
                     border_style=border_color,
                     header_style=f"bold {color}",
-                    width=112,
+                    width=Constants.TUI_MAX_WIDTH,
                     box=box.ROUNDED,
                 )
 
-                threads_table.add_column("Author", width=16)
-                threads_table.add_column("Message", style="dim", min_width=89)
-                # print(str(comment['notes'][0].get('body')))
-                # print(comment['notes'][0].get('type', 'none'))
+                threads_table.add_column("Author", width=Constants.TUI_AUTHOR_WIDTH)
+                threads_table.add_column(
+                    "Message",
+                    style="dim",
+                    min_width=Constants.TUI_MAX_WIDTH
+                    - Constants.TUI_AUTHOR_WIDTH
+                    - Constants.TUI_TWO_COL_PADDING_WIDTH,
+                )
                 for note in comment["notes"]:
                     threads_table.add_row(note["author"]["name"], note["body"])
 
