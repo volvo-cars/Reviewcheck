@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 
 class UrlBuilder:
@@ -35,5 +36,7 @@ class UrlBuilder:
         return url
 
     @staticmethod
-    def construct_jira_link(jira_url: str, ticket_number: str) -> str:
-        return f"{jira_url}/{ticket_number}"
+    def construct_jira_link(jira_url: str, ticket_number: Optional[str]) -> str:
+        if ticket_number:
+            return f"{jira_url}/{ticket_number}"
+        return "No JIRA reference found"
