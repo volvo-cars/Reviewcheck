@@ -5,7 +5,6 @@ You have to configure the script before running it by running reviewcheck --conf
 """
 import json
 import logging
-import random
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -231,7 +230,7 @@ def run() -> int:
                 ]
             )
 
-            color = random.choice(Constants.COLORS)
+            color = Constants.COLORS[id % len(Constants.COLORS)]
 
             if len(discussion_data) > 0:
                 if n_response_required == 0 and not args.all:
