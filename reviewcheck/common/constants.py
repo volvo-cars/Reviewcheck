@@ -1,8 +1,9 @@
 from pathlib import Path
+from typing import List
 
 
 class Constants:
-    COLORS = [
+    COLORS: List[str] = [
         "green",
         "yellow",
         "blue",
@@ -32,7 +33,7 @@ class Constants:
         "indian_red",
     ]
 
-    CONFIG_PATH = Path.home() / ".config" / "reviewcheckrc"
+    CONFIG_PATH: Path = Path.home() / ".config" / "reviewcheckrc"
 
     TUI_MAX_WIDTH = 112
     TUI_AUTHOR_WIDTH = 16

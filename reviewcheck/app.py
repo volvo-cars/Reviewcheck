@@ -8,7 +8,7 @@ import logging
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from rich import box
@@ -36,7 +36,9 @@ session.mount(
 )
 
 
-def download_gitlab_data(get_data):
+def download_gitlab_data(
+    get_data: Tuple[str, int, str],
+) -> Tuple[List[Dict[str, Any]], int]:
     url, mr_id, secret_token = get_data
     response = session.get(url, headers={"PRIVATE-TOKEN": secret_token})
     response_json = json.loads(response.content)
@@ -72,41 +74,58 @@ def download_gitlab_data(get_data):
             # server is overloaded? give it a break
             time.sleep(5)
 
-    return response_json, mr_id
+    if isinstance(response_json, list):
+        if isinstance(response_json[0], dict):
+            return response_json, mr_id
+
+    raise Exception("Malformed data returned from GitLab.")
 
 
-def is_user_referenced_in_thread(notes, uname):
+def is_user_referenced_in_thread(
+    notes: List[Dict[str, Any]],
+    username: str,
+) -> bool:
     for note in notes:
-        if ("@" + uname) in note["body"]:
+        if ("@" + username) in note["body"]:
             return True
-
-
-def is_user_author_of_thread(mr, notes, uname):
-    if mr["author"] == uname:
-        if notes[-1]["author"]["username"] != uname:
-            return True
-
     return False
 
 
-def is_user_participating_in_thread(notes, uname):
-    for note in notes:
-        if note["author"]["username"] == uname:
+def is_user_author_of_thread(
+    mr: Dict[str, Any],
+    notes: List[Dict[str, Any]],
+    username: str,
+) -> bool:
+    if mr["author"] == username:
+        if notes[-1]["author"]["username"] != username:
             return True
-
     return False
 
 
-def get_rows_highlighting(comment, needs_reply, uname):
+def is_user_participating_in_thread(
+    notes: List[Dict[str, Any]],
+    username: str,
+) -> bool:
+    for note in notes:
+        if note["author"]["username"] == username:
+            return True
+    return False
+
+
+def get_rows_highlighting(
+    comment: Dict[str, Any],
+    needs_reply: bool,
+    username: str,
+) -> List[str]:
     """Messages after your own last message should be highlighted"""
     n_replies = len(comment["notes"])
     notes = comment["notes"]
     author_list = [n["author"]["username"] for n in notes]
     if not needs_reply:
         return [""] * (n_replies)
-    elif uname not in author_list:
+    elif username not in author_list:
         return ["bold white not dim"] * (n_replies)
-    i_my_last_reply = n_replies - author_list[::-1].index(uname)
+    i_my_last_reply = n_replies - author_list[::-1].index(username)
     return [""] * (i_my_last_reply) + ["bold white not dim"] * (
         n_replies - i_my_last_reply
     )
