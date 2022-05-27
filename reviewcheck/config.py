@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -31,20 +31,22 @@ class Config:
             project_ids = input("Project IDs (space-separated): ")
 
             if project_ids:
-                project_ids = [int(i) for i in project_ids.split(" ")]
+                project_ids_list = [int(i) for i in project_ids.split(" ")]
+            else:
+                project_ids_list = []
 
-            config_object = {
+            config_object: Dict[str, Any] = {
                 "secret_token": token,
                 "user": username,
                 "api_url": api_url,
                 "jira_url": jira_url,
-                "project_ids": project_ids,
+                "project_ids": project_ids_list,
             }
 
             with open(Constants.CONFIG_PATH, "w") as f:
                 f.write(yaml.safe_dump(config_object))
 
-    def get_configuration(self) -> Optional[dict]:
+    def get_configuration(self) -> Optional[Dict[str, Any]]:
         """
         Reads the configuration file into a dictionary. If the configuration file does
         not exist, queries the user for information and writes it.
@@ -56,6 +58,16 @@ class Config:
         self.setup_configuration()
         try:
             with open(Constants.CONFIG_PATH, "r") as f:
-                return yaml.safe_load(f)
+                content = yaml.safe_load(f)
         except FileNotFoundError:
             return None
+
+        if isinstance(content, dict):
+            return content
+        else:
+            print(
+                f"ERROR - the configuration {Constants.CONFIG_PATH} couldn't"
+                "be parsed as a dictionary."
+            )
+
+        return None

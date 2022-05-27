@@ -14,7 +14,7 @@ class TestConfig(TestCase):
     """
 
     @mock.patch("builtins.input")
-    def test_setup_configuration(self, mock_input):
+    def test_setup_configuration(self, mock_input: mock.MagicMock) -> None:
         """
         Verifies that the interactive configuration setup works as expected.
         """
@@ -55,7 +55,7 @@ class TestConfig(TestCase):
             self.assertIn(123, config_obj["project_ids"])
             self.assertIn(456, config_obj["project_ids"])
 
-    def test_setup_configuration_without_reconfigure(self):
+    def test_setup_configuration_without_reconfigure(self) -> None:
         """
         Verifies that the configuration setup does not alter anything if the file
         already exists.
