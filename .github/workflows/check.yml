@@ -22,11 +22,8 @@ jobs:
           python-version: "3.8"
           # cache: "poetry"
 
-      - run: pip3 install poetry
-
-      - run: poetry config virtualenvs.create false
-
-      - run: poetry install
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
 
       - run: poetry run black --check --diff --color .
 
@@ -45,11 +42,8 @@ jobs:
           python-version: "3.8"
           cache: "poetry"
 
-      - run: pip3 install poetry
-
-      - run: poetry config virtualenvs.create false
-
-      - run: poetry install
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
 
       - run: poetry run pytest tests/
 
@@ -64,10 +58,7 @@ jobs:
           python-version: "3.8"
           cache: "poetry"
 
-      - run: pip3 install poetry
-
-      - run: poetry config virtualenvs.create false
-
-      - run: poetry install
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
 
       - run: poetry build
