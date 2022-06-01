@@ -5,6 +5,7 @@ TARGET := reviewcheck
 BLACK := ${RUN} black
 FLAKE8 := ${RUN} flake8
 ISORT := ${RUN} isort
+MYPY := ${RUN} mypy
 PYTEST := ${RUN} pytest
 PYTHON := ${RUN} python3
 
@@ -18,8 +19,9 @@ run:
 
 lint:
 	${BLACK} --check --diff --color .
-	${ISORT} --color --check-only --diff .
 	${FLAKE8}
+	${ISORT} --color --check-only --diff .
+	${MYPY} --strict .
 
 format:
 	${ISORT} .
