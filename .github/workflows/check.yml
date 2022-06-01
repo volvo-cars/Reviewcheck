@@ -31,6 +31,8 @@ jobs:
 
       - run: poetry run flake8
 
+      - run: poetry run mypy --strict .
+
   test:
     runs-on: pss-cyberpunk
 
