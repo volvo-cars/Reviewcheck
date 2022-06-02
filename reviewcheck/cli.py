@@ -39,6 +39,15 @@ class Cli:
             formatter_class=RawTextHelpFormatter,
         )
 
+        parser.add_argument(
+            "--version",
+            help="Show version",
+            dest="print_version",
+            required=False,
+            action="store_true",
+            default=False,
+        )
+
         shtab.add_argument_to(parser, ["-s", "--print-completion"])
 
         parser.add_argument(

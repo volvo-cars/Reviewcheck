@@ -170,6 +170,12 @@ def get_info_box_content(
 def run() -> int:
     args = Cli.parse_arguments()
 
+    if args.print_version:
+        from reviewcheck import __version__
+
+        print(__version__)
+        return 0
+
     command_palette = {
         "configure": configure,
     }
