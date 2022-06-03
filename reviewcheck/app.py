@@ -75,7 +75,7 @@ def download_gitlab_data(
             time.sleep(5)
 
     if isinstance(response_json, list):
-        if isinstance(response_json[0], dict):
+        if len(response_json) == 0 or isinstance(response_json[0], dict):
             return response_json, mr_id
 
     raise Exception("Malformed data returned from GitLab.")
