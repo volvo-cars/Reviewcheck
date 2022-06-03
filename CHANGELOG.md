@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Bug where the presence of an MR with no discussions on it would cause
+  the app to crash.
+
 ## [0.2.0] - 2022-06-02
 
 ### Added
