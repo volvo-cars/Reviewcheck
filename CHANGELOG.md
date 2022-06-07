@@ -4,8 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] 2022-06-07
+
 ### Added
 
+- `--version` flag added.
 - Flag for hiding discussions you don't need to reply to (`--minimal`).
   That is, if you are the last person to have written in a discussion
   in an MR that you are a part of, that discussion will be hidden rather
