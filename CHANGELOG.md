@@ -4,10 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Flag for hiding discussions you don't need to reply to (`--minimal`).
+  That is, if you are the last person to have written in a discussion
+  in an MR that you are a part of, that discussion will be hidden rather
+  than just greyed out.
+
 ### Fixed
 
 - Bug where the presence of an MR with no discussions on it would cause
   the app to crash.
+- Session is now reset for each time we get new data from GitLab.
 
 ## [0.2.0] - 2022-06-02
 
@@ -16,10 +24,6 @@ All notable changes to this project will be documented in this file.
 - Interactive configuration of tool.
 - Tab completion file generation.
 - Source branch name is now shown in the info box for each MR.
-- Flag for hiding discussions you don't need to reply to (`--minimal`).
-  That is, if you are the last person to have written in a discussion
-  in an MR that you are a part of, that discussion will be hidden rather
-  than just greyed out.
 
 ### Changed
 
