@@ -324,6 +324,12 @@ def run() -> int:
                 console.print(mr_info_header)
 
             for comment in discussion_data:
+                # When minimal view is requsted, only show threads where a response is
+                # required
+                if args.minimal:
+                    if comment["notes"][-1]["author"]["username"] == user:
+                        continue
+
                 reply_needed = False
                 if comment["notes"][-1]["author"]["username"] != user:
                     reply_needed = True

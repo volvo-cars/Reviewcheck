@@ -97,6 +97,15 @@ class Cli:
             dest="refresh_time",
         )
 
+        parser.add_argument(
+            "-m",
+            "--minimal",
+            help="Only show discussion where a reply is needed.",
+            action="store_true",
+            default=False,
+            dest="minimal",
+        )
+
         subparsers = parser.add_subparsers(dest="command")
 
         subparsers.add_parser(
