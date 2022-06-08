@@ -44,7 +44,7 @@ jobs:
           name: reviewcheck-package
 
       - run: |
-          version="$(find -name 'reviewcheck-*.tar.gz' | sort -rn | head -1 | sed 's|\./foo-\(.*\)\.tar\.gz|\1|')"
+          version="$(find -name 'reviewcheck-*.tar.gz' | sort -rn | head -1 | sed 's|\./reviewcheck-\(.*\)\.tar\.gz|\1|')"
           curl -sSf -H "X-JFrog-Art-Api:$ARTIFACTORY_TOKEN" -X PUT \
           -T reviewcheck-*.tar.gz "$ARTIFACTORY_BASE_URL/$version/"
         env:
