@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Breaking
+
+- Removed the --fast flag because recent performance improvements make it
+  superfluous.
+
 ## [0.3.1] 2022-06-08
 
 No changes.

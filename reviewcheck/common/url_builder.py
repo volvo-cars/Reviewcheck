@@ -15,11 +15,8 @@ class UrlBuilder:
     def construct_project_mr_list_url(
         api_url: str,
         project: int,
-        fast_mode: bool = False,
     ) -> str:
         url = f"{api_url}/projects/{project}/merge_requests?state=opened&per_page=500"
-        if fast_mode:
-            url += "&sort=asc" + UrlBuilder._get_created_after_utm_parameter(3)
 
         return url
 

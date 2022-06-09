@@ -35,6 +35,14 @@ class Cli:
         secret_token: <get a secret token from your settings in gitlab>
         user: <your username>
         ```
+
+        There is also some optional configuration:
+
+        ```
+        ignored_mrs: [123, 546, 789] (defult: empty list)
+        show_all_discussions: true (defult: false)
+        hide_replied_discussions: true (default: false)
+        ```
         """,
             formatter_class=RawTextHelpFormatter,
         )
@@ -66,15 +74,6 @@ class Cli:
             action="store",
             default=False,
             dest="user",
-        )
-
-        parser.add_argument(
-            "-f",
-            "--fast-mode",
-            help="Enables fast mode, only checking MRs created in the last three weeks",
-            action="store_true",
-            default=False,
-            dest="fast",
         )
 
         parser.add_argument(
