@@ -388,11 +388,15 @@ def run() -> int:
     if "hide_replied_discussions" not in config:
         config["hide_replied_discussions"] = args.minimal
 
-    if args.refresh_time is None:
-        show_reviews(config)
-        return 0
+    try:
+        if args.refresh_time is None:
+            show_reviews(config)
+            return 0
 
-    while True:
-        console.clear()
-        show_reviews(config)
-        time.sleep(args.refresh_time * 60)
+        while True:
+            console.clear()
+            show_reviews(config)
+            time.sleep(args.refresh_time * 60)
+    except KeyboardInterrupt:
+        print("Bye bye!")
+        return 0
