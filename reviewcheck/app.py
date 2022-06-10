@@ -8,6 +8,7 @@ import logging
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
@@ -228,6 +229,17 @@ def show_reviews(config: Dict[str, Any]) -> None:
                 mrs[mr_id]["discussion_data"] = response_json
                 progress.update(gitlab_download_task, advance=1)
 
+    console.print(
+        Panel(
+            Text(
+                f"Status as of {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                justify="center",
+            ),
+            style="reverse bold",
+        ),
+        width=Constants.TUI_MAX_WIDTH,
+    )
+
     for id, mr in mrs.items():
         discussion_data = mr["discussion_data"]
         discussion_data = [c for c in discussion_data if "resolved" in c["notes"][0]]
@@ -376,12 +388,11 @@ def run() -> int:
     if "hide_replied_discussions" not in config:
         config["hide_replied_discussions"] = args.minimal
 
-    while True:
+    if args.refresh_time is None:
         show_reviews(config)
-        if args.refresh_time is None:
-            break
-        else:
-            time.sleep(args.refresh_time * 60)
-            print("\n" * 30)
+        return 0
 
-    return 0
+    while True:
+        console.clear()
+        show_reviews(config)
+        time.sleep(args.refresh_time * 60)
