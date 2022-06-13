@@ -1,4 +1,4 @@
-![reviewcheck logo](reviewcheck-logo-short.png)
+![reviewcheck logo](logo-short.png)
 
 # Reviewcheck
 
