@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Date is shown for comments and MRs. It's shown next to the comment for
+  comments and in the info box for MRs.
+
+### Changed
+
+- The width of the TUI has been reduced slightly.
+
 ### Breaking
 
 - Removed the --fast flag because recent performance improvements make it
