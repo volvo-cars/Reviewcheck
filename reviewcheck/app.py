@@ -21,8 +21,10 @@ from rich.text import Text
 
 from reviewcheck.cli import Cli
 from reviewcheck.common.constants import Constants
+from reviewcheck.common.exceptions import RCException
 from reviewcheck.common.url_builder import UrlBuilder
 from reviewcheck.config import Config
+from reviewcheck.utils import Utils
 
 console = Console()
 THREAD_POOL = 32
@@ -165,6 +167,7 @@ def get_info_box_content(
         f"\n\nGitLab link:   {mr['mr_data']['web_url']}"
         f"\nJira link:     {UrlBuilder.construct_jira_link(jira_url, jira)}"
         f"\nSource branch: {mr['mr_data']['source_branch']}"
+        f"\nCreated at:    {Utils.convert_time(mr['mr_data']['created_at'])}"
         f"\n\n{mr['mr_data']['description']}"
     )
 
@@ -325,19 +328,27 @@ def show_reviews(config: Dict[str, Any]) -> None:
                 box=box.ROUNDED,
             )
 
+            threads_table.add_column("Date", width=Constants.TUI_DATE_WIDTH)
             threads_table.add_column("Author", width=Constants.TUI_AUTHOR_WIDTH)
             threads_table.add_column(
                 "Message",
                 style="dim",
                 min_width=Constants.TUI_MAX_WIDTH
                 - Constants.TUI_AUTHOR_WIDTH
-                - Constants.TUI_TWO_COL_PADDING_WIDTH,
+                - Constants.TUI_DATE_WIDTH
+                - Constants.TUI_THREE_COL_PADDING_WIDTH,
             )
             for note in comment["notes"]:
-                threads_table.add_row(note["author"]["name"], note["body"])
+                update_time = Utils.convert_time(note["updated_at"])
+                threads_table.add_row(
+                    update_time,
+                    note["author"]["name"],
+                    note["body"],
+                )
 
             if reply_needed:
                 threads_table.add_row(
+                    "",
                     "Discussion link",
                     f"{mr['mr_data']['web_url']}#note_{comment['notes'][0]['id']}",
                 )
@@ -398,5 +409,8 @@ def run() -> int:
             show_reviews(config)
             time.sleep(args.refresh_time * 60)
     except KeyboardInterrupt:
-        print("Bye bye!")
+        print("\nBye bye!")
         return 0
+    except RCException as e:
+        logging.error(f"Reviewcheck encountered a problem: {e}")
+        return 1
