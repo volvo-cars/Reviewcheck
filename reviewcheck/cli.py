@@ -56,7 +56,7 @@ class Cli:
             default=False,
         )
 
-        shtab.add_argument_to(parser, ["-s", "--print-completion"])
+        shtab.add_argument_to(parser, ["-s", "--print-completion"])  # type: ignore
 
         parser.add_argument(
             "-a",
