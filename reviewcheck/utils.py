@@ -7,8 +7,8 @@ class Utils:
     @staticmethod
     def convert_time(timestamp: str) -> str:
         """
-        Converts timestamps from the format that GitLab uses to a human readable one
-        like so:
+        Converts timestamps from the format that GitLab uses to a human
+        readable one like so:
 
             <date> <short month> <hour><minute>
         """
@@ -18,7 +18,13 @@ class Utils:
                 "%Y-%m-%dT%H:%M:%S.%f%z",
             )
         except ValueError:
-            raise RCException(f"Couldn't parse GitLab timestamp '{timestamp}'")
+            try:
+                time = datetime.strptime(
+                    timestamp[0:-6],
+                    "%Y-%m-%dT%H:%M:%S.%f",
+                )
+            except ValueError:
+                raise RCException(f"Couldn't parse GitLab timestamp '{timestamp}'")
         human_readable_time = datetime.strftime(
             time,
             "%d %b %H:%M",
