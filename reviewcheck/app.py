@@ -11,7 +11,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from shutil import get_terminal_size
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set
 
 import requests
 from rich import box
@@ -29,62 +29,6 @@ from reviewcheck.config import Config
 from reviewcheck.utils import Utils
 
 console = Console()
-THREAD_POOL = 32
-
-
-def download_gitlab_data(
-    get_data: Tuple[str, int, str],
-) -> Tuple[List[Dict[str, Any]], int]:
-    # This is how to create a reusable connection pool with python requests.
-    with requests.Session() as session:
-        session.mount(
-            "https://",
-            requests.adapters.HTTPAdapter(
-                pool_maxsize=THREAD_POOL, max_retries=3, pool_block=True
-            ),
-        )
-        url, mr_id, secret_token = get_data
-        response = session.get(url, headers={"PRIVATE-TOKEN": secret_token})
-        response_json = json.loads(response.content)
-        logging.info(
-            "request was completed in %s seconds [%s]",
-            response.elapsed.total_seconds(),
-            response.url,
-        )
-        if response.status_code != 200:
-            logging.error(
-                "request failed, error code %s [%s]", response.status_code, response.url
-            )
-        if 500 <= response.status_code < 600:
-            # server is overloaded? give it a break
-            time.sleep(5)
-
-        num_pages = int(response.headers["X-Total-Pages"])
-        for page in range(2, num_pages + 1):
-            response = session.get(
-                f"{url}&page={page}", headers={"PRIVATE-TOKEN": secret_token}
-            )
-            response_json += json.loads(response.content)
-            logging.info(
-                "request was completed in %s seconds [%s]",
-                response.elapsed.total_seconds(),
-                response.url,
-            )
-            if response.status_code != 200:
-                logging.error(
-                    "request failed, error code %s [%s]",
-                    response.status_code,
-                    response.url,
-                )
-            if 500 <= response.status_code < 600:
-                # server is overloaded? give it a break
-                time.sleep(5)
-
-    if isinstance(response_json, list):
-        if len(response_json) == 0 or isinstance(response_json[0], dict):
-            return response_json, mr_id
-
-    raise Exception("Malformed data returned from GitLab.")
 
 
 def is_user_referenced_in_thread(
@@ -251,11 +195,11 @@ def show_reviews(config: Dict[str, Any]) -> None:
                 id,
             )
 
-        with ThreadPoolExecutor(max_workers=THREAD_POOL) as executor:
+        with ThreadPoolExecutor(max_workers=Constants.THREADPOOL_MAXSIZE) as executor:
             progress.start_task(gitlab_download_task)
             progress.update(gitlab_download_task, total=len(mrs))
             for response_json, mr_id in executor.map(
-                download_gitlab_data,
+                Utils.download_gitlab_data,
                 [(mr["url"], id, secret_token) for id, mr in mrs.items()],
             ):
                 mrs[mr_id]["discussion_data"] = response_json
@@ -331,8 +275,8 @@ def show_reviews(config: Dict[str, Any]) -> None:
             console.print(mr_info_header)
 
         for comment in discussion_data:
-            # When minimal view is requsted, only show threads where a response is
-            # required
+            # When minimal view is requsted, only show threads where a
+            # response is required
             if hide_replied_discussions:
                 if comment["notes"][-1]["author"]["username"] == user:
                     continue
