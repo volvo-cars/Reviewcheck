@@ -4,18 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2022-06-28
+
 ### Added
 
+- Clean shutdown on keyboard interruption.
 - Date is shown for comments and MRs. It's shown next to the comment for
   comments and in the info box for MRs.
 
 ### Changed
 
+- Now actually clear screen between runs (with `--refresh`), and separate
+  runs by a header.
 - The width of the TUI has been reduced slightly.
 
 ### Breaking
 
-- Removed the --fast flag because recent performance improvements make it
+- Removed the `--fast` flag because recent performance improvements make it
   superfluous.
 
 ## [0.3.1] 2022-06-08
