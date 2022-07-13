@@ -9,6 +9,7 @@ import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from shutil import get_terminal_size
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
@@ -240,7 +241,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
             ),
             style="reverse bold",
         ),
-        width=Constants.TUI_MAX_WIDTH,
+        width=config["output_width"],
     )
 
     for id, mr in mrs.items():
@@ -295,7 +296,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
                     )
                 ),
                 title=get_info_box_title(mr, jira, color),
-                width=Constants.TUI_MAX_WIDTH,
+                width=config["output_width"],
             )
             console.print(mr_info_header)
 
@@ -324,7 +325,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
                 row_styles=row_highlighting_style,
                 border_style=border_color,
                 header_style=f"bold {color}",
-                width=Constants.TUI_MAX_WIDTH,
+                width=config["output_width"],
                 box=box.ROUNDED,
             )
 
@@ -333,7 +334,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
             threads_table.add_column(
                 "Message",
                 style="dim",
-                min_width=Constants.TUI_MAX_WIDTH
+                min_width=config["output_width"]
                 - Constants.TUI_AUTHOR_WIDTH
                 - Constants.TUI_DATE_WIDTH
                 - Constants.TUI_THREE_COL_PADDING_WIDTH,
@@ -389,6 +390,11 @@ def run() -> int:
 
     if args.user:
         config["user"] = args.user.upper()
+
+    if args.output_width:
+        config["output_width"] = args.output_width
+    else:
+        config.setdefault("output_width", get_terminal_size().columns)
 
     if "ignored_mrs" not in config:
         config["ignored_mrs"] = args.ignore

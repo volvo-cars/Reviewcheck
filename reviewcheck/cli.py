@@ -105,6 +105,15 @@ class Cli:
             dest="minimal",
         )
 
+        parser.add_argument(
+            "-w",
+            "--width",
+            help="Terminal display width",
+            type=Cli.check_positive_int,
+            action="store",
+            dest="output_width",
+        )
+
         subparsers = parser.add_subparsers(dest="command")
 
         subparsers.add_parser(

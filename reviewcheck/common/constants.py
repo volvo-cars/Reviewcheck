@@ -35,7 +35,6 @@ class Constants:
 
     CONFIG_PATH: Path = Path.home() / ".config" / "reviewcheckrc"
 
-    TUI_MAX_WIDTH = 108
     TUI_AUTHOR_WIDTH = 16
     TUI_DATE_WIDTH = 12
     TUI_TWO_COL_PADDING_WIDTH = 7
