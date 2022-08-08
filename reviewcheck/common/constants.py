@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 
@@ -33,7 +34,12 @@ class Constants:
         "indian_red",
     ]
 
-    CONFIG_PATH: Path = Path.home() / ".config" / "reviewcheckrc"
+    CONFIG_DIR: Path = Path(os.environ.get("XDG_CONFIG", Path.home() / ".config"))
+    CONFIG_PATH: Path = CONFIG_DIR / "reviewcheckrc"
+
+    CACHE_DIR: Path = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
+    DATA_DIR: Path = CACHE_DIR / "reviewcheck"
+    COMMENT_NOTE_IDS_PATH: Path = DATA_DIR / "old_comment_ids"
 
     TUI_AUTHOR_WIDTH = 16
     TUI_DATE_WIDTH = 12
