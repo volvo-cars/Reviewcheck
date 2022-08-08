@@ -433,7 +433,8 @@ def run() -> int:
         return 1
 
     if args.user:
-        config["user"] = args.user.upper()
+        config["user"] = args.user
+    config["user"] = config["user"].upper()
 
     if args.output_width:
         config["output_width"] = args.output_width
