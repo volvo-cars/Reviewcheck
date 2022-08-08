@@ -6,11 +6,12 @@ You have to configure the script before running it by running reviewcheck --conf
 import json
 import logging
 import re
+import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from shutil import get_terminal_size
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
 from rich import box
@@ -173,6 +174,28 @@ def get_info_box_content(
     )
 
 
+def read_comment_note_ids_from_file() -> Set[str]:
+    """Read stored comment note IDs from last check."""
+    old_comment_note_ids: Set[str] = set()
+    try:
+        with open(Constants.COMMENT_NOTE_IDS_PATH) as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        return old_comment_note_ids
+
+    for line in lines:
+        old_comment_note_ids.add(line.strip())
+
+    return old_comment_note_ids
+
+
+def write_comment_note_ids_to_file(new_comment_note_ids: Set[str]) -> None:
+    """Write all the comment note IDs from the last run to file"""
+    with open(Constants.COMMENT_NOTE_IDS_PATH, "w") as f:
+        for id in new_comment_note_ids:
+            f.write(f"{id}\n")
+
+
 def show_reviews(config: Dict[str, Any]) -> None:
     secret_token = config["secret_token"]
     api_url = config["api_url"]
@@ -244,6 +267,8 @@ def show_reviews(config: Dict[str, Any]) -> None:
         width=config["output_width"],
     )
 
+    old_comment_note_ids = read_comment_note_ids_from_file()
+    new_comment_note_ids: Set[str] = set()
     for id, mr in mrs.items():
         discussion_data = mr["discussion_data"]
         discussion_data = [c for c in discussion_data if "resolved" in c["notes"][0]]
@@ -311,6 +336,17 @@ def show_reviews(config: Dict[str, Any]) -> None:
             if comment["notes"][-1]["author"]["username"] != user:
                 reply_needed = True
 
+                # For notifications
+                new_comment_note_id = comment["notes"][-1]["id"]
+                new_comment_note_ids.add(new_comment_note_id)
+                if str(new_comment_note_id) not in old_comment_note_ids:
+                    message = (
+                        comment["notes"][-1]["author"]["name"]
+                        + ": "
+                        + comment["notes"][-1]["body"]
+                    )
+                    subprocess.run(["notify-send", message])
+
             border_color = f"{color}" if reply_needed else "white"
 
             row_highlighting_style = get_rows_highlighting(
@@ -355,6 +391,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
                 )
 
             console.print(threads_table)
+    write_comment_note_ids_to_file(new_comment_note_ids)
 
 
 def run() -> int:
@@ -381,6 +418,8 @@ def run() -> int:
                 "`reviewcheck --help`."
             )
             return 127
+
+    Constants.DATA_DIR.mkdir(exist_ok=True)
 
     config = Config(False).get_configuration()
 
