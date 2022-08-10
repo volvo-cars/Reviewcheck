@@ -14,7 +14,8 @@ class Config:
         self.reconfigure = reconfigure
 
     def setup_configuration(self) -> None:
-        # Only attempt to write the configuration file if it does not already exist
+        # Only attempt to write the configuration file if it does not
+        # already exist.
         if self.reconfigure or not Constants.CONFIG_PATH.exists():
             Constants.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
@@ -48,11 +49,12 @@ class Config:
 
     def get_configuration(self) -> Optional[Dict[str, Any]]:
         """
-        Reads the configuration file into a dictionary. If the configuration file does
-        not exist, queries the user for information and writes it.
+        Reads the configuration file into a dictionary. If the
+        configuration file does not exist, queries the user for
+        information and writes it.
 
-        :return: A dict containing the contents of the configuration file, or None if
-        the file does not exist.
+        :return: A dict containing the contents of the configuration
+            file, or None if the file does not exist.
         """
 
         self.setup_configuration()
