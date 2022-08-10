@@ -147,10 +147,15 @@ def get_info_box_title(
     jira_ticket_number: Optional[str],
     color: str,
 ) -> str:
-    return (
-        f"[bold {color}]{mr['mr_data']['title']} | "
-        f"!{mr['mr_data']['iid']} | {jira_ticket_number}"
-    )
+    title_elements = [
+        f"[bold {color}]{mr['mr_data']['title']}",
+        f"!{mr['mr_data']['iid']}",
+    ]
+
+    if jira_ticket_number:
+        title_elements.append(jira_ticket_number)
+
+    return " | ".join(title_elements)
 
 
 def get_info_box_content(
@@ -299,7 +304,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
             console.print()
 
             # Parse the VIRA ticket number
-            jira_regex = re.compile(r".*JIRA: (.*)(\\n)*")
+            jira_regex = re.compile(r".*(?i)JIRA: (.*)(\\n)*")
             jira_match = jira_regex.match(mr["mr_data"]["description"].split("\n")[-1])
             jira = None
             if jira_match:
