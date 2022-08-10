@@ -16,10 +16,12 @@ class TestConfig(TestCase):
     @mock.patch("builtins.input")
     def test_setup_configuration(self, mock_input: mock.MagicMock) -> None:
         """
-        Verifies that the interactive configuration setup works as expected.
+        Verifies that the interactive configuration setup works as
+        expected.
         """
 
-        # The setup_configuration method reads input from the user five times in a row:
+        # The setup_configuration method reads input from the user five
+        # times in a row:
         # token, username, api url, jira url, and finally project IDs
         mock_input.side_effect = [
             "very_secret",
@@ -57,8 +59,8 @@ class TestConfig(TestCase):
 
     def test_setup_configuration_without_reconfigure(self) -> None:
         """
-        Verifies that the configuration setup does not alter anything if the file
-        already exists.
+        Verifies that the configuration setup does not alter anything if
+        the file already exists.
         """
 
         with tempfile.TemporaryDirectory(

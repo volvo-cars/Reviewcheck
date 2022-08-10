@@ -1,3 +1,4 @@
 [flake8]
 ignore = E123,W503,E722
 max-line-length = 88
+max-doc-length = 72

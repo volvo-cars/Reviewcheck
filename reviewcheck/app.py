@@ -1,7 +1,9 @@
 """
-A script to show you what threads in GitLab you've forgotten to respond to.
+A script to show you what threads in GitLab you've forgotten to respond
+to.
 
-You have to configure the script before running it by running reviewcheck --configure
+You have to configure the script before running it by running
+reviewcheck --configure.
 """
 import json
 import logging
@@ -276,7 +278,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
 
         for comment in discussion_data:
             # When minimal view is requsted, only show threads where a
-            # response is required
+            # response is required.
             if hide_replied_discussions:
                 if comment["notes"][-1]["author"]["username"] == user:
                     continue
