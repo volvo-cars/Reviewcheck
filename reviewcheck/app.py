@@ -291,12 +291,9 @@ def show_reviews(config: Dict[str, Any]) -> None:
                 new_comment_note_id = comment["notes"][-1]["id"]
                 new_comment_note_ids.add(new_comment_note_id)
                 if str(new_comment_note_id) not in old_comment_note_ids:
-                    message = (
-                        comment["notes"][-1]["author"]["name"]
-                        + ": "
-                        + comment["notes"][-1]["body"]
-                    )
-                    subprocess.run(["notify-send", message])
+                    title = f'{comment["notes"][-1]["author"]["name"]} via Reviewcheck'
+                    body = comment["notes"][-1]["body"]
+                    subprocess.run(["notify-send", "--expire-time=15000", title, body])
 
             border_color = f"{color}" if reply_needed else "white"
 
