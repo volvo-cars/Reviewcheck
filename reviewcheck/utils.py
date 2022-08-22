@@ -1,3 +1,4 @@
+"""File containing utility functions."""
 import json
 import logging
 import time
@@ -11,10 +12,13 @@ from reviewcheck.common.exceptions import RCException
 
 
 class Utils:
+    """Class that contains utility functions for reviewcheck."""
+
     @staticmethod
     def convert_time(timestamp: str) -> str:
-        """
-        Converts timestamps from the format that GitLab uses to a human
+        """Convert GitLab timestamps to human-readable timestamps.
+
+        Convert timestamps from the format that GitLab uses to a human
         readable one like so:
 
             <date> <short month> <hour><minute>
@@ -42,6 +46,18 @@ class Utils:
     def download_gitlab_data(
         get_data: Tuple[str, int, str],
     ) -> Tuple[List[Dict[str, Any]], int]:
+        """Download each page of data for a given GitLab MR.
+
+        Download the data for a given MR. All pages are downloaded and
+        then combined to one list. The data mainly contains the comments
+        and threads on the MR with associated metadata.
+
+        :param get_data: Information about the data to get. This is the
+            url to the merge request, it's ID, and the token for
+            authenticaing with GitLab.
+
+        :return: All data for the MR as a list.
+        """
         # This is how to create a reusable connection pool with python
         # requests.
 

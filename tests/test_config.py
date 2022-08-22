@@ -1,3 +1,4 @@
+"""Tests for config.py."""
 import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
@@ -9,17 +10,15 @@ from reviewcheck.config import Config
 
 
 class TestConfig(TestCase):
-    """
-    Test cases for configuration-related operations.
-    """
+    """Test cases for configuration-related operations."""
 
     @mock.patch("builtins.input")
     def test_setup_configuration(self, mock_input: mock.MagicMock) -> None:
-        """
+        """Test the interactive setup configuration.
+
         Verifies that the interactive configuration setup works as
         expected.
         """
-
         # The setup_configuration method reads input from the user five
         # times in a row:
         # token, username, api url, jira url, and finally project IDs
@@ -58,11 +57,11 @@ class TestConfig(TestCase):
             self.assertIn(456, config_obj["project_ids"])
 
     def test_setup_configuration_without_reconfigure(self) -> None:
-        """
+        """Test that configuration file is not altered when not needed.
+
         Verifies that the configuration setup does not alter anything if
         the file already exists.
         """
-
         with tempfile.TemporaryDirectory(
             prefix="REVIECHECK_TEST"
         ) as tmpdir, mock.patch(
