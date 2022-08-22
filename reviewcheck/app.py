@@ -1,6 +1,4 @@
-"""
-A script to show you what threads in GitLab you've forgotten to respond
-to.
+"""Script to show what threads in GitLab you've forgotten to respond to.
 
 You have to configure the script before running it by running
 reviewcheck --configure.
@@ -37,6 +35,14 @@ def is_user_referenced_in_thread(
     notes: List[Dict[str, Any]],
     username: str,
 ) -> bool:
+    """Check if configured user is mentioned in a given thread.
+
+    :param notes: The thread to check as a list of notes.
+    :param username: The username of the configured user.
+
+    :return: True if the user is mentioned in the given thread,
+        otherwise false.
+    """
     for note in notes:
         if ("@" + username) in note["body"]:
             return True
@@ -48,6 +54,19 @@ def is_user_author_of_thread(
     notes: List[Dict[str, Any]],
     username: str,
 ) -> bool:
+    """Check if the given user has responded to thread in its MR.
+
+    Check whether the given user is the author of the current merge
+    request, and if so, whether is the last person to respond to the
+    given thread.
+
+    :param mr: The merge request to check.
+    :param notes: The thread to check.
+    :param username: The username to look for as author.
+
+    :return: False if the user doesn't have anything to respond to,
+        otherwise True.
+    """
     if mr["author"] == username:
         if notes[-1]["author"]["username"] != username:
             return True
@@ -58,6 +77,14 @@ def is_user_participating_in_thread(
     notes: List[Dict[str, Any]],
     username: str,
 ) -> bool:
+    """Check if user is active in current thread.
+
+    :param notes: The thread to check whether the user is active in.
+    :param: The username of the user to check for involvement of.
+
+    :return: True if the user is involved in the current thread,
+        otherwise False.
+    """
     for note in notes:
         if note["author"]["username"] == username:
             return True
@@ -69,7 +96,20 @@ def get_rows_highlighting(
     needs_reply: bool,
     username: str,
 ) -> List[str]:
-    """Messages after your own last message should be highlighted"""
+    """Return list of highligh configuration for each note in a thread.
+
+    Messages after the user's own last message should be highlighted.
+    This marks them as "new". It is assumed that all messages that have
+    been added after the user's own last message is new to the user.
+
+    :param comment: The thread to provide highlighting for.
+    :param needs_reply: Whether there are new messages after the user's
+        last message.
+    :param username: Username of the user who needs to reply.
+
+    :return: List of highlighting information to be given to the rich
+        library function for highlighting the given thread.
+    """
     n_replies = len(comment["notes"])
     notes = comment["notes"]
     author_list = [n["author"]["username"] for n in notes]
@@ -84,6 +124,10 @@ def get_rows_highlighting(
 
 
 def configure() -> int:
+    """Set up the configuration of reviewcheck.
+
+    :return: Always returns 0.
+    """
     Config(True).setup_configuration()
     return 0
 
@@ -93,6 +137,15 @@ def get_info_box_title(
     jira_ticket_number: Optional[str],
     color: str,
 ) -> str:
+    """Return the info box title with rich text configuration.
+
+    :param mr: Data about the mr to construct title for.
+    :param jira_ticket_number: The JIRA ticket number associated with
+        the MR.
+    :param color: Color to use for the title when printing.
+
+    :return: The formatted title to use for the info box.
+    """
     title_elements = [
         f"[bold {color}]{mr['mr_data']['title']}",
         f"!{mr['mr_data']['iid']}",
@@ -112,6 +165,21 @@ def get_info_box_content(
     n_your_notes: int,
     n_response_required: int,
 ) -> str:
+    """Return the content of the info box for an merge request.
+
+    :param mr: Data for the merge request in question.
+    :param jira_url: URL to JIRA ticket associated with the merge
+        request, or replacement text.
+    :param jira: JIRA ticket number.
+    :param n_all_notes: Number of threads on the merge request.
+    :param n_your_notes: Number of threads on the merge request where
+        the user is involved.
+    :param n_response_required: Number of threads on the merge request
+        where the user is involved and hasn't replied to a message.
+
+    :return: The text to put in the info box for the given merge
+        request.
+    """
     return (
         f"Open discussions: {n_all_notes}"
         f"\nOpen discussions where you are involved: {n_your_notes}"
@@ -126,7 +194,11 @@ def get_info_box_content(
 
 
 def read_comment_note_ids_from_file() -> Set[str]:
-    """Read stored comment note IDs from last check."""
+    """Read stored comment note IDs from last check.
+
+    :return: The IDs of those comments that were considered in need of a
+        reply on the last run of reviewcheck.
+    """
     old_comment_note_ids: Set[str] = set()
     try:
         with open(Constants.COMMENT_NOTE_IDS_PATH) as f:
@@ -141,13 +213,21 @@ def read_comment_note_ids_from_file() -> Set[str]:
 
 
 def write_comment_note_ids_to_file(new_comment_note_ids: Set[str]) -> None:
-    """Write all the comment note IDs from the last run to file"""
+    """Write all the comment note IDs from the last run to file.
+
+    :param new_comment_note_ids: The IDs of the comments that are
+        considered in need of a reply during this run of reviewcheck.
+    """
     with open(Constants.COMMENT_NOTE_IDS_PATH, "w") as f:
         for id in new_comment_note_ids:
             f.write(f"{id}\n")
 
 
 def show_reviews(config: Dict[str, Any]) -> None:
+    """Download MR data and present review info for each relevant MR.
+
+    :param config: The resolved configuration of reviewcheck.
+    """
     secret_token = config["secret_token"]
     api_url = config["api_url"]
     jira_url = config["jira_url"]
@@ -343,6 +423,7 @@ def show_reviews(config: Dict[str, Any]) -> None:
 
 
 def run() -> int:
+    """Start execution of reviewcheck."""
     args = Cli.parse_arguments()
 
     if args.print_version:

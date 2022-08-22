@@ -1,3 +1,4 @@
+"""Main file for reviewcheck, where execution starts."""
 import sys
 
 from reviewcheck import app

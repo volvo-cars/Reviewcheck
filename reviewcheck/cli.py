@@ -1,3 +1,4 @@
+"""Parse the command line arguments given to reviewcheck."""
 import argparse
 from argparse import Namespace, RawTextHelpFormatter
 
@@ -5,8 +6,22 @@ import shtab
 
 
 class Cli:
+    """Class with the functions associated with argument parsing."""
+
     @staticmethod
     def check_positive_int(value: str) -> int:
+        """Return positive int if possible, otherwise raise exception.
+
+        Validator for checking that a variable is a positive integer and
+        converting it to the int type.
+
+        :param value: The value given on command line.
+
+        :raises:ArgumentTypeError: Raised when the value cannot be
+            converted to a positive integer.
+
+        :return: The value as a positive int if possible.
+        """
         try:
             ivalue = int(value)
         except Exception:
@@ -19,6 +34,13 @@ class Cli:
 
     @staticmethod
     def parse_arguments() -> Namespace:
+        """Parse the arguments given on the command line.
+
+        Create an argument parser and use it to parse the arguments
+        given on the command line.
+
+        :return: The parsed arguments as a Namespace object.
+        """
         parser = argparse.ArgumentParser(
             description="""
         This script will tell you which discussions on GitLab you need to respond to.

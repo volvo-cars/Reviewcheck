@@ -1,9 +1,12 @@
+"""File for holding constants used in reviewcheck."""
 import os
 from pathlib import Path
 from typing import List
 
 
 class Constants:
+    """Class for holding constants used in reviewcheck."""
+
     COLORS: List[str] = [
         "green",
         "yellow",
