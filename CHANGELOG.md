@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2022-10-14
+
+### Added
+
+- Show desktop notification when there is a new comment.
+- Subject line added to desktop notifications.
+- Adapt width of output to the terminal width, and allow configuring it. Default
+  is to fill the whole terminal.
+
+### Changed
+
+- Make Jira regex case insensitive (when trying to figure out the ticket
+  number).
+
+### Fixed
+
+- Ensure that username is made into uppercase, in adaption to GitLab API data.
+
 ## [0.4.0] - 2022-06-28
 
 ### Added
