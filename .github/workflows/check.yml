@@ -25,6 +25,9 @@ jobs:
           python-version: "3.6"
           cache: "poetry"
 
+      - name: Install dependencies
+        run: poetry install
+
       - run: poetry run black --check --diff --color .
 
       - run: poetry run isort --check-only --diff .
@@ -47,6 +50,9 @@ jobs:
           python-version: "3.6"
           cache: "poetry"
 
+      - name: Install dependencies
+        run: poetry install
+
       - run: poetry run pytest tests/
 
   build:
@@ -63,4 +69,8 @@ jobs:
           python-version: "3.6"
           cache: "poetry"
 
-      - run: poetry build
+      - name: Install dependencies
+        run: poetry install --no-dev
+
+      - name: Build reviewcheck package
+        run: poetry build
