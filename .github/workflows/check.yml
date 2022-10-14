@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   lint:
-    runs-on: pss-cyberpunk
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
       - run: poetry run mypy --strict .
 
   test:
-    runs-on: pss-cyberpunk
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -50,7 +50,7 @@ jobs:
       - run: poetry run pytest tests/
 
   build:
-    runs-on: pss-cyberpunk
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
