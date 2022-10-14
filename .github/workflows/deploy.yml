@@ -10,31 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install poetry
-        run: pipx install poetry
-
-      - uses: actions/setup-python@v3
-        with:
-          python-version: "3.6"
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install --no-dev
-
-      - name: Build reviewcheck package
-        run: poetry build
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: reviewcheck-package
-          path: dist/reviewcheck-*.tar.gz
-
   blackduck:
     name: Blackduck
     runs-on: ubuntu-latest
@@ -61,20 +36,24 @@ jobs:
     runs-on: ubuntu-latest
 
     needs:
-      - build
       - blackduck
 
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: reviewcheck-package
+      - name: Install poetry
+        run: pipx install poetry
 
-      - run: |
-          version="$(find -name 'reviewcheck-*.tar.gz' | sort -rn | head -1 | sed 's|\./reviewcheck-\(.*\)\.tar\.gz|\1|')"
-          curl -sSf -H "X-JFrog-Art-Api:$ARTIFACTORY_TOKEN" -X PUT \
-          -T reviewcheck-*.tar.gz "$ARTIFACTORY_BASE_URL/$version/"
-        env:
-          ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
-          ARTIFACTORY_BASE_URL: ${{ secrets.ARTIFACTORY_BASE_URL }}
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.6"
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install --no-dev
+
+      - name: Configure PyPI credentials
+        run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+
+      - name: Deploy package
+        run: poetry publish --build
