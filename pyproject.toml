@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reviewcheck"
-version = "0.5.0"
+version = "0.5.1"
 description = "Tool to stay up to date with your reviews on GitLab – Don't let a comment slip you by"
 authors = ["Simon Bengtsson <simon.bengtsson.3@volvocars.com>", "Pontus Laos <pontus.laos@volvocars.com>"]
 license = "Apache-2.0 license"
