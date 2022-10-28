@@ -1,4 +1,4 @@
-![reviewcheck logo](logo-short.png)
+![reviewcheck logo](https://github.com/volvo-cars/Reviewcheck/raw/main/logo-short.png)
 
 # Reviewcheck
 
@@ -11,27 +11,69 @@ Reviewcheck is in active development.
 
 ## Installation
 
-While the project is still in development, the best way to install it is by
-cloning the repository and running `poetry run reviewcheck` from within it. You
-will need to have poetry installed. The process looks as follows:
+Reviewcheck can be installed with the following command:
 
+```Shell
+pip install reviewcheck
 ```
+
+If you are a developer, the best way to test changes you make without having to
+create a Python package and install it is to clone the repository and run
+`poetry run reviewcheck` from within it. You will need to have poetry
+installed. The process looks as follows:
+
+```Shell
 pip install poetry
 git clone https://github.com/volvo-cars/Reviewcheck
 cd reviewcheck
 poetry run reviewcheck
 ```
 
-## Documentation
+## Getting Started
 
-For now, the only documentation is this README and the `--help` flag of the
-program itself. A proper
-[Wiki](https://github.com/volvo-cars/Reviewcheck/wiki) is
-under construction.
+Reviewcheck has a terminal-based user interface. You run it on the command line
+with `reviewcheck`. The first time you run it, you will be able to
+interactively configure it to find your reviews.
 
-## FAQ [NYI]
+After that, any time you run `reviewcheck`, you will be presented with a list
+of threads from any MR where your response is needed. You can configure how
+verbose the output is with options. See the `--help` option for more information
+about that.
 
-See [FAQ (NYI)](docs/faq/faq.md) for more questions.
+## FAQ
+
+<dl>
+  <dt>How do I configure Reviewcheck?</dt>
+  <dd>The first time you run `reviewcheck`, the interactive configuration will
+  start. You can rerun it with `reviewcheck configure`. If you know what you're
+  doing, you may also edit the config file directly. You'll find the
+  configuration file `reviewcheckrc` under your config directory, usually
+  `~/.config/`.</dd>
+
+  <dt>Will you support other software hosting pages than GitLab?</dt>
+  <dd>Yes! We hope to support Gerrit in the near future and Gitea and GitHub in the
+  far future.</dd>
+
+  <dt>What triggers the desktop notifications?</dt>
+  <dd>When Reviewcheck is run and a new message is discovered in a thread that
+  Reviewcheck judges you should respond to, you will get a desktop notification
+  containing the new message. This may be useful when you're running in a loop
+  with the `--refresh` option.</dd>
+
+  <dt>Why are you asking for a JIRA url?</dt>
+  <dd>This is only relevant if your organization uses JIRA and tags merge requests
+  with the JIRA ticket number. It will help Reviewcheck provide you with a link
+  to the ticket connected to the merge request. Please report a bug if your
+  organization uses JIRA but the current system doesn't work for you.</dd>
+
+  <dt>How can I get regular updates without having to remember to run Reviewcheck?</dt>
+  <dd>You may benefit from running Reviewcheck with the `--refresh` option. It will
+  check for new review data at a regular interval of your choosing. For example.
+  if you run `reviewcheck --refresh 10`, you will get a new report every 10
+  minutes. You can even keep reviewcheck running in the background this way,
+  since you get desktop notifications any time there is a new message that needs
+  your attention.</dd>
+</dl>
 
 ## Support
 
