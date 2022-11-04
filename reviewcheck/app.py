@@ -1,3 +1,6 @@
+# Copyright 2022 Volvo Cars Corporation
+# Licensed under Apache 2.0.
+
 """Script to show what threads in GitLab you've forgotten to respond to.
 
 You have to configure the script before running it by running

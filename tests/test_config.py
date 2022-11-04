@@ -1,3 +1,6 @@
+# Copyright 2022 Volvo Cars Corporation
+# Licensed under Apache 2.0.
+
 """Tests for config.py."""
 import tempfile
 from pathlib import Path

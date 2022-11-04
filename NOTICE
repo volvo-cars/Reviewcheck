@@ -1,9 +1,6 @@
 Copyright 2022
 
-[reviewcheck : 0.4.0]
-
-Phase: DEVELOPMENT
-Distribution: EXTERNAL
+[reviewcheck : 0.5.1]
 
 Components: 
 
@@ -46,6 +43,86 @@ types-requests 2.28.0 : Apache License 2.0
 types-urllib3 1.26.15 : Apache License 2.0
 urllib3 1.26.9 : MIT License
 zipp 3.6.0 : MIT License
+
+
+Copyright Text: 
+
+Click - Python Command Line Utility 8.0.4 pypi:click/8.0.4
+    Copyright 2002-2006 Python Software Foundation. All rights reserved
+    Copyright 2001-2006 Gregory P. Ward. All rights reserved
+    Copyright 2002-2006 Python Software Foundation
+CommonMark-py 0.9.1 pypi:commonmark/0.9.1
+    Copyright (c) 2014, John MacFarlane All rights reserved
+    Copyright (c) 2014, Bibek Kafle and Roland Shoemaker
+Packaging 21.3 pypi:packaging/21.3
+    Copyright (c) Donald Stufft and individual contributors.
+PyYAML 5.4.1 pypi:PyYAML/5.4.1
+    Copyright (c) 2017-2021 Ingy döt Net
+    Copyright (c) 2006-2016 Kirill Simonov
+Pyflakes 2.4.0 pypi:pyflakes/2.4.0
+    Copyright 2005-2011 Divmod, Inc.
+    Copyright 2013 Florent Xicluna.  See LICENSE file for details
+    Copyright 2013-2014 Florent Xicluna
+RonnyPfannschmidt/iniconfig 1.1.1 pypi:iniconfig/1.1.1
+    (C) Ronny Pfannschmidt, Holger Krekel -- MIT licensed
+atomicwrites 1.4.0 pypi:atomicwrites/1.4.0
+    copyright = '2015, Markus Unterwaditzer
+    Copyright (c) 2015-2016 Markus Unterwaditzer
+    copyright = '2015-2017, Markus Unterwaditzer
+charset-normalizer 2.0.12 pypi:charset-normalizer/2.0.12
+    Copyright (c) 2019 TAHRI Ahmed R.
+    copyright: (c) 2021 by Ahmed TAHRI
+    copyright = '2019, Ahmed TAHRIauthor = 'Ahmed TAHRI @Ousret'
+dataclasses 0.8 pypi:dataclasses/0.8
+    Copyright 2017-2022 Eric V. Smith, all rights reserved.
+flake8 4.0.1 pypi:flake8/4.0.1
+    Copyright (C) 2011-2013 Tarek Ziade <tarek@ziade.org>
+    Copyright (C) 2012-2016 Ian Cordasco <graffatcolmingov@gmail.com>
+importlib-metadata 4.2.0 pypi:importlib-metadata/4.2.0
+    Copyright 2017-2019 Jason R. Coombs, Barry Warsaw
+isort 5.10.1 pypi:isort/5.10.1
+    Copyright (c) 2021 Taneli Hukkinen
+    Copyright (c) 2013 Timothy Edmund Crosley
+mccabe 0.6.1 pypi:mccabe/0.6.1
+    Copyright © 2011-2013 Tarek Ziade <tarek@ziade.org>
+    Copyright © 2013 Florent Xicluna <florent.xicluna@gmail.com>
+    Copyright © <year> Ned Batchelder
+mypy-extensions 0.4.3 pypi:mypy-extensions/0.4.3
+    Copyright (c) 2016-2017 Jukka Lehtosalo and contributors
+pathspec 0.9.0 pypi:pathspec/0.9.0
+    Copyright 2019-2020 Kevin Locke <kevin@kevinlocke.name>
+    Copyright © 2013-2021 Caleb P. Burns
+py 1.11.0 pypi:py/1.11.0
+    (C) Ronny Pfannschmidt, Holger Krekel -- MIT licensed
+pycodestyle 2.8.0 pypi:pycodestyle/2.8.0
+    Copyright (C) 2009-2014 Florent Xicluna <florent.xicluna@gmail.com>
+    Copyright (C) 2014-2016 Ian Lee <ianlee1521@gmail.com>
+    Copyright (C) 2006-2009 Johann C. Rocholl <johann@rocholl.net>
+pytest 7.0.1 pypi:pytest/7.0.1
+    Copyright (c) 2004 Holger Krekel and others
+python-attrs 21.4.0 pypi:attrs/21.4.0
+    Copyright (c) 2015 Hynek Schlawack
+python-pluggy 1.0.0 pypi:pluggy/1.0.0
+    Copyright (c) 2015 holger krekel (rather uses bitbucket/hpk42)
+python-typing-extensions 4.1.1 pypi:typing-extensions/4.1.1
+    Copyright (c) 1991 - 1995, Stichting Mathematisch Centrum Amsterdam,The Netherlands.  All rights reserved
+    Copyright (c) 1995-2001 Corporation for National Research Initiatives; All Rights Reserved
+    Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 Python Software Foundation; All Rights Reserved
+requests 2.27.1 pypi:requests/2.27.1
+    Copyright 2019 Kenneth Reitz
+    copyright: (c) 2012 by Kenneth Reitz.
+    copyright: (c) 2017 by Kenneth Reitz.
+    Copyright 2022 Kenneth Reitz
+tomli 1.2.3 pypi:tomli/1.2.3
+    Copyright (c) 2021 Taneli Hukkinen
+urllib3 1.26.9 pypi:urllib3/1.26.9
+    Copyright (c) 2010-2020 Benjamin Peterson
+    Copyright (c) 2015-2016 Will Bond <will@wbond.net>
+    Copyright (C) 2012 Senko Rasic <senko.rasic@dobarkod.hr>
+    Copyright 2015 Google Inc. All rights reserved
+zipp 3.6.0 pypi:zipp/3.6.0
+    Copyright Jason R. Coombs
+
 
 Licenses: 
 

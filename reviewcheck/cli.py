@@ -1,3 +1,6 @@
+# Copyright 2022 Volvo Cars Corporation
+# Licensed under Apache 2.0.
+
 """Parse the command line arguments given to reviewcheck."""
 import argparse
 from argparse import Namespace, RawTextHelpFormatter
