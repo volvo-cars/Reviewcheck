@@ -1,3 +1,6 @@
+# Copyright 2022 Volvo Cars Corporation
+# Licensed under Apache 2.0.
+
 """General test file for reviewcheck."""
 from reviewcheck import __version__
 

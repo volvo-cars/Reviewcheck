@@ -1,3 +1,6 @@
+# Copyright 2022 Volvo Cars Corporation
+# Licensed under Apache 2.0.
+
 """File containing the Config class for working with config files."""
 from typing import Any, Dict, Optional
 
