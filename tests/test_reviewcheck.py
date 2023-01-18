@@ -1,4 +1,4 @@
-# Copyright 2022 Volvo Cars Corporation
+# Copyright 2022 Volvo Car Corporation
 # Licensed under Apache 2.0.
 
 """General test file for reviewcheck."""
