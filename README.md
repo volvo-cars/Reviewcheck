@@ -54,6 +54,16 @@ of threads from any MR where your response is needed. You can configure how
 verbose the output is with options. See the `--help` option for more information
 about that.
 
+Whenever there is a new review comment that wasn't present the last time
+Reviewcheck fetched comments, you will receive a desktop notification. An
+example:
+
+![screenshot of Reviewcheck desktop notification](./rc-desktop-notification.png)
+
+Notifications are sent using `notify-send` so the notification should look like
+any other desktop notification on your system. They will likely differ in
+visual appearance from the example image.
+
 ## FAQ
 
 <dl>
