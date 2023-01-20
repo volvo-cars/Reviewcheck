@@ -1,11 +1,11 @@
-![reviewcheck logo](https://github.com/volvo-cars/Reviewcheck/raw/main/logo-short.png)
+![Reviewcheck logo](https://github.com/volvo-cars/Reviewcheck/raw/main/logo-short.png)
 
 # Reviewcheck
 
 Reviewcheck is a tool to stay up to date with your reviews on GitLab. You can
 configure it to use any GitLab instance you have access to. The tool checks all
-open merge requests in the repos chosen by you, and lets you know if there are
-open threads that need your attention.
+open merge requests in the repositories chosen by you, and lets you know if
+there are open threads that need your attention.
 
 Reviewcheck is in active development.
 
@@ -60,9 +60,9 @@ about that.
   <dt>How do I configure Reviewcheck?</dt>
   <dd>The first time you run `reviewcheck`, the interactive configuration will
   start. You can rerun it with `reviewcheck configure`. If you know what you're
-  doing, you may also edit the config file directly. You'll find the
-  configuration file `reviewcheckrc` under your config directory, usually
-  `~/.config/`.</dd>
+  doing, you may also edit the configuration file directly. You'll find the
+  configuration file `reviewcheckrc` in your configuration files directory,
+  usually `~/.config/`.</dd>
 
   <dt>Will you support other software hosting pages than GitLab?</dt>
   <dd>Yes! We hope to support Gerrit in the near future and Gitea and GitHub in the
@@ -74,7 +74,7 @@ about that.
   containing the new message. This may be useful when you're running in a loop
   with the `--refresh` option.</dd>
 
-  <dt>Why are you asking for a JIRA url?</dt>
+  <dt>Why are you asking for a JIRA URL?</dt>
   <dd>This is only relevant if your organization uses JIRA and tags merge requests
   with the JIRA ticket number. It will help Reviewcheck provide you with a link
   to the ticket connected to the merge request. Please report a bug if your
@@ -84,7 +84,7 @@ about that.
   <dd>You may benefit from running Reviewcheck with the `--refresh` option. It will
   check for new review data at a regular interval of your choosing. For example.
   if you run `reviewcheck --refresh 10`, you will get a new report every 10
-  minutes. You can even keep reviewcheck running in the background this way,
+  minutes. You can even keep Reviewcheck running in the background this way,
   since you get desktop notifications any time there is a new message that needs
   your attention.</dd>
 </dl>

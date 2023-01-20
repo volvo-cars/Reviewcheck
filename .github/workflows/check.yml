@@ -74,3 +74,15 @@ jobs:
 
       - name: Build reviewcheck package
         run: poetry build
+
+  spell:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install "aspell" spell checker
+        run: sudo apt-get install -y aspell
+
+      - name: Check spelling of documentation
+        run: ./.github/bin/spellcheck.sh
