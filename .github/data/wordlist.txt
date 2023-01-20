@@ -1,0 +1,13 @@
+personal_ws-1.1 en 12 utf-8
+Bengtsson
+Dockerfile
+Gerrit
+GitLab
+Gitea
+JIRA
+Jira
+Pontus
+Reviewcheck
+TUI
+changelog
+greyed
