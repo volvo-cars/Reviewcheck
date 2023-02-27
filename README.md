@@ -11,22 +11,36 @@ Reviewcheck is in active development.
 
 ## Installation
 
+### With pip
+
 Reviewcheck can be installed with the following command:
 
-```Shell
-pip install reviewcheck
+```console
+$ pip install reviewcheck
 ```
+
+### With Poetry
 
 If you are a developer, the best way to test changes you make without having to
 create a Python package and install it is to clone the repository and run
 `poetry run reviewcheck` from within it. You will need to have poetry
 installed. The process looks as follows:
 
-```Shell
-pip install poetry
-git clone https://github.com/volvo-cars/Reviewcheck
-cd reviewcheck
-poetry run reviewcheck
+```console
+$ pip install poetry
+$ git clone https://github.com/volvo-cars/Reviewcheck
+$ cd reviewcheck
+$ poetry run reviewcheck
+```
+
+### With Docker
+
+There's also a Dockerfile available to use. Currently it does not get uploaded
+anywhere, so you'll need to build it locally and then run it. Example commands:
+
+```console
+$ docker build -t reviewcheck .
+$ docker run -tv ~/.config/reviewcheckrc:/root/.config/reviewcheckrc reviewcheck
 ```
 
 ## Getting Started
