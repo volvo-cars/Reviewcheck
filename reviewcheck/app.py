@@ -226,7 +226,7 @@ def write_comment_note_ids_to_file(new_comment_note_ids: Set[str]) -> None:
             f.write(f"{id}\n")
 
 
-def show_reviews(config: Dict[str, Any]) -> None:
+def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
     """Download MR data and present review info for each relevant MR.
 
     :param config: The resolved configuration of reviewcheck.
@@ -373,7 +373,10 @@ def show_reviews(config: Dict[str, Any]) -> None:
                 # For notifications
                 new_comment_note_id = comment["notes"][-1]["id"]
                 new_comment_note_ids.add(new_comment_note_id)
-                if str(new_comment_note_id) not in old_comment_note_ids:
+                if (
+                    not no_notifications
+                    and str(new_comment_note_id) not in old_comment_note_ids
+                ):
                     title = f'{comment["notes"][-1]["author"]["name"]} via Reviewcheck'
                     body = comment["notes"][-1]["body"]
                     subprocess.run(["notify-send", "--expire-time=15000", title, body])
@@ -479,12 +482,12 @@ def run() -> int:
 
     try:
         if args.refresh_time is None:
-            show_reviews(config)
+            show_reviews(config, args.no_notifications)
             return 0
 
         while True:
             console.clear()
-            show_reviews(config)
+            show_reviews(config, args.no_notifications)
             time.sleep(args.refresh_time * 60)
     except KeyboardInterrupt:
         print("\nBye bye!")
