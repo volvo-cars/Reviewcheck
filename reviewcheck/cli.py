@@ -139,6 +139,14 @@ class Cli:
             dest="output_width",
         )
 
+        parser.add_argument(
+            "-N",
+            "--no-notifications",
+            help="Do not invoke notify-send(1)",
+            action="store_true",
+            default=False,
+        )
+
         subparsers = parser.add_subparsers(dest="command")
 
         subparsers.add_parser(
