@@ -11,26 +11,21 @@ permissions:
 
 jobs:
   blackduck:
-    name: Blackduck
-    runs-on: pss-cyberpunk
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '17'
-
-      - name: Software Composition Analysis with Black Duck
-        uses: blackducksoftware/github-action@9ea442b34409737f64743781e9adc71fd8e17d38
-        with:
-          args: '--blackduck.url="${{ secrets.BLACKDUCK_URL }}" --blackduck.api.token="${{ secrets.BLACKDUCK_TOKEN }}"'
+      - name: Black Duck Scan
+        env:
+          BLACKDUCK_URL: ${{ secrets.BLACKDUCK_URL }}
+          BLACKDUCK_API_TOKEN: ${{ secrets.BLACKDUCK_TOKEN }}
+          DETECT_PROJECT_NAME: ${{ github.event.repository.name }}
+          DETECT_PROJECT_VERSION_NAME: ${{ github.ref_name }}
+          DETECT_CODE_LOCATION_NAME: ${{ github.event.repository.name }}-${{ github.ref_name }}
+          DETECT_EXCLUDED_DETECTOR_TYPES: GIT
+        run: |
+          curl -fLsS -o $RUNNER_TEMP/detect8.sh https://detect.synopsys.com/detect8.sh && chmod +x $RUNNER_TEMP/detect8.sh
+          $RUNNER_TEMP/detect8.sh
 
   deploy:
     runs-on: ubuntu-latest
