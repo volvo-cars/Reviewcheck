@@ -11,6 +11,9 @@ Reviewcheck is in active development.
 
 ## Installation
 
+Reviewcheck depends on Python >=3.8.1. There are multiple ways to install it.
+The simplest is with `pip`.
+
 ### With pip
 
 Reviewcheck can be installed with the following command:
