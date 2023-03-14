@@ -377,9 +377,20 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
                     not no_notifications
                     and str(new_comment_note_id) not in old_comment_note_ids
                 ):
-                    title = f'{comment["notes"][-1]["author"]["name"]} via Reviewcheck'
-                    body = comment["notes"][-1]["body"]
-                    subprocess.run(["notify-send", "--expire-time=15000", title, body])
+                    last_comment_author = comment["notes"][-1]["author"]["name"]
+                    last_comment_body = comment["notes"][-1]["body"]
+                    notification_title = f"New comment on MR !{id}"
+                    notification_body = (
+                        f"{last_comment_author} writes:\n\n{last_comment_body}"
+                    )
+                    subprocess.run(
+                        [
+                            "notify-send",
+                            "--expire-time=15000",
+                            notification_title,
+                            notification_body,
+                        ]
+                    )
 
             border_color = f"{color}" if reply_needed else "white"
 
