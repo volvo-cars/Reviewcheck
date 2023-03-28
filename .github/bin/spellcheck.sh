@@ -1,24 +1,5 @@
 #!/bin/sh
 
-# The markdown mode of aspell does not make code be ignored (but it is still
-# useful for not spellchecking links). This sed command removes both inline code
-# and code blocks.
-
-# sed -e 's/\s*`\b.*\b`//g' -e '/```.*/,/```/d' README.md -i
-# aspell --home-dir=.github --personal=data/wordlist.txt --lang=en_US --mode=markdown list < README.md | sort -u > badwords
-# if [ -s badwords ]
-# then
-#     grep -w -C 3 --color=always -f badwords README.md
-#     printf "\n-----------------------------------------------------------------------\n"
-#     printf "The following words are not in the English, nor the project's dictionary:\n"
-#     cat badwords
-#     printf "\nCheck your spelling and if you think you've spelled correctly, update the file\n.github/data/wordlist.txt"
-#     exit 1
-# else
-#     echo "No misspelled words discovered!"
-#     exit 0
-# fi
-
 green=$(tput -T xterm setaf 2)
 red=$(tput -T xterm setaf 1)
 normal=$(tput -T xterm sgr0)
@@ -45,10 +26,16 @@ find * -name "*.md" |
             # the repository.
             file_to_check_basename=$(basename "$file_to_check")
             cp "$file_to_check" $tmp_dir
+
+            # This sed command removes both inline code and code blocks to
+            # prevent spell checking it.
             sed -ri \
                 -e 's/\s*`[^`]+`//g' \
                 -e '/```.*/,/```/d' \
                 "$tmp_dir/$file_to_check_basename"
+
+            # The markdown mode of aspell does not make code be ignored (but it
+            # is still useful for not spellchecking links).
             aspell \
                 --home-dir=./ \
                 --personal=.github/data/wordlist.txt \
@@ -56,6 +43,7 @@ find * -name "*.md" |
                 --mode=markdown \
                 list < "$tmp_dir/$file_to_check_basename" |
                 sort -u > "$tmp_dir/badwords"
+
             if [ -s "$tmp_dir/badwords" ]
             then
                 misspelled_files="exists"
