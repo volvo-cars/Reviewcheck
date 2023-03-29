@@ -103,7 +103,7 @@ visual appearance from the example image.
 
 For support or other queries, contact project owner [Simon
 Bengtsson](mailto:simon.bengtsson.3@volvocars.com) or project maintainer [Pontus
-Laos](mailto:pontus.laos@volcoars.com).
+Laos](mailto:pontus.laos@volvocars.com).
 
 ## Contributing
 
