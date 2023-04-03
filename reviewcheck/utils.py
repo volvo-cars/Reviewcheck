@@ -4,9 +4,10 @@
 """File containing utility functions."""
 import json
 import logging
+import re
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 
@@ -117,3 +118,22 @@ class Utils:
                 return response_json, mr_id
 
         raise Exception("Malformed data returned from GitLab.")
+
+    @staticmethod
+    def extract_jira(description: str) -> Optional[str]:
+        """Extract JIRA ticket number from MR description.
+
+        :param description: The description of the MR.
+        :return: Jira ticket number if found, otherwise None.
+        """
+        # Parse the VIRA ticket number
+        jira_regex = re.compile(r".*(?i)JIRA: (.*)(\\n)*")
+        jira_match = jira_regex.match(description)
+        jira = None
+        if jira_match:
+            jira = str(jira_match.group(1))
+            already_a_link_regex = re.compile(r"\[(.*)\].*")
+            already_a_link = already_a_link_regex.match(jira)
+            if already_a_link:
+                jira = str(already_a_link.group(1))
+        return jira

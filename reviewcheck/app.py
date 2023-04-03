@@ -8,7 +8,6 @@ reviewcheck --configure.
 """
 import json
 import logging
-import re
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -332,17 +331,6 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
                 continue
             console.print()
 
-            # Parse the VIRA ticket number
-            jira_regex = re.compile(r".*(?i)JIRA: (.*)(\\n)*")
-            jira_match = jira_regex.match(mr["mr_data"]["description"].split("\n")[-1])
-            jira = None
-            if jira_match:
-                jira = str(jira_match.group(1))
-                already_a_link_regex = re.compile(r"\[(.*)\].*")
-                already_a_link = already_a_link_regex.match(jira)
-                if already_a_link:
-                    jira = str(already_a_link.group(1))
-
             mr_info_header = Panel(
                 Text(
                     get_info_box_content(
@@ -365,6 +353,7 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
             if hide_replied_discussions:
                 if comment["notes"][-1]["author"]["username"] == user:
                     continue
+        jira = Utils.extract_jira(mr["mr_data"]["description"].split("\n")[-1])
 
             reply_needed = False
             if comment["notes"][-1]["author"]["username"] != user:
