@@ -301,10 +301,12 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
     )
 
     old_comment_note_ids = read_comment_note_ids_from_file()
-    new_comment_note_ids: Set[str] = set()
+    ids_of_all_last_notes: Set[str] = set()
     for id, mr in mrs.items():
         discussion_data = mr["discussion_data"]
+        # Keep only threads (notes that are resolveable)
         discussion_data = [c for c in discussion_data if "resolved" in c["notes"][0]]
+        # ...and only those that are not already resolved
         discussion_data = [c for c in discussion_data if not c["notes"][0]["resolved"]]
         n_all_notes = len(discussion_data)
         discussion_data = [
@@ -326,106 +328,103 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
 
         color = Constants.COLORS[id % len(Constants.COLORS)]
 
-        if len(discussion_data) > 0:
-            if n_response_required == 0 and not show_all_discussions:
-                continue
-            console.print()
+        jira_ticket = Utils.extract_jira(mr["mr_data"]["description"].split("\n")[-1])
 
-            mr_info_header = Panel(
-                Text(
-                    get_info_box_content(
-                        mr,
-                        jira_url,
-                        jira,
-                        n_all_notes,
-                        n_your_notes,
-                        n_response_required,
-                    )
-                ),
-                title=get_info_box_title(mr, jira, color),
-                width=config["output_width"],
-            )
-            console.print(mr_info_header)
+        mr_info_header = Panel(
+            Text(
+                get_info_box_content(
+                    mr,
+                    jira_url,
+                    jira_ticket,
+                    n_all_notes,
+                    n_your_notes,
+                    n_response_required,
+                )
+            ),
+            title=get_info_box_title(mr, jira_ticket, color),
+            width=config["output_width"],
+        )
 
-        for comment in discussion_data:
-            # When minimal view is requsted, only show threads where a
-            # response is required.
-            if hide_replied_discussions:
-                if comment["notes"][-1]["author"]["username"] == user:
-                    continue
-        jira = Utils.extract_jira(mr["mr_data"]["description"].split("\n")[-1])
-
-            reply_needed = False
-            if comment["notes"][-1]["author"]["username"] != user:
-                reply_needed = True
-
+        if n_response_required > 0 or show_all_discussions:
+            for comment in discussion_data:
                 # For notifications
-                new_comment_note_id = comment["notes"][-1]["id"]
-                new_comment_note_ids.add(new_comment_note_id)
-                if (
-                    not no_notifications
-                    and str(new_comment_note_id) not in old_comment_note_ids
-                ):
-                    last_comment_author = comment["notes"][-1]["author"]["name"]
-                    last_comment_body = comment["notes"][-1]["body"]
-                    notification_title = f"New comment on MR !{id}"
-                    notification_body = (
-                        f"{last_comment_author} writes:\n\n{last_comment_body}"
-                    )
-                    subprocess.run(
-                        [
-                            "notify-send",
-                            "--expire-time=15000",
-                            notification_title,
-                            notification_body,
-                        ]
-                    )
+                last_note = comment["notes"][-1]
+                ids_of_all_last_notes.add(last_note["id"])
+                last_note_author = last_note["author"]
 
-            border_color = f"{color}" if reply_needed else "white"
+                # When minimal view is requsted, only show threads where
+                # a response is required.
+                if hide_replied_discussions:
+                    if last_note_author["username"] == user:
+                        continue
 
-            row_highlighting_style = get_rows_highlighting(
-                comment,
-                reply_needed,
-                user,
-            )
+                reply_needed = False
+                if last_note_author["username"] != user:
+                    reply_needed = True
 
-            threads_table = Table(
-                show_header=True,
-                show_lines=True,
-                row_styles=row_highlighting_style,
-                border_style=border_color,
-                header_style=f"bold {color}",
-                width=config["output_width"],
-                box=box.ROUNDED,
-            )
+                    if (
+                        not no_notifications
+                        and str(last_note["id"]) not in old_comment_note_ids
+                    ):
+                        notification_title = f"New comment on MR !{id}"
+                        notification_body = (
+                            f"{last_note_author['name']} writes:\n\n{last_note['body']}"
+                        )
+                        subprocess.run(
+                            [
+                                "notify-send",
+                                "--expire-time=15000",
+                                notification_title,
+                                notification_body,
+                            ]
+                        )
 
-            threads_table.add_column("Date", width=Constants.TUI_DATE_WIDTH)
-            threads_table.add_column("Author", width=Constants.TUI_AUTHOR_WIDTH)
-            threads_table.add_column(
-                "Message",
-                style="dim",
-                min_width=config["output_width"]
-                - Constants.TUI_AUTHOR_WIDTH
-                - Constants.TUI_DATE_WIDTH
-                - Constants.TUI_THREE_COL_PADDING_WIDTH,
-            )
-            for note in comment["notes"]:
-                update_time = Utils.convert_time(note["updated_at"])
-                threads_table.add_row(
-                    update_time,
-                    note["author"]["name"],
-                    note["body"],
+                border_color = f"{color}" if reply_needed else "white"
+
+                row_highlighting_style = get_rows_highlighting(
+                    comment,
+                    reply_needed,
+                    user,
                 )
 
-            if reply_needed:
-                threads_table.add_row(
-                    "",
-                    "Discussion link",
-                    f"{mr['mr_data']['web_url']}#note_{comment['notes'][0]['id']}",
+                threads_table = Table(
+                    show_header=True,
+                    show_lines=True,
+                    row_styles=row_highlighting_style,
+                    border_style=border_color,
+                    header_style=f"bold {color}",
+                    width=config["output_width"],
+                    box=box.ROUNDED,
                 )
 
-            console.print(threads_table)
-    write_comment_note_ids_to_file(new_comment_note_ids)
+                threads_table.add_column("Date", width=Constants.TUI_DATE_WIDTH)
+                threads_table.add_column("Author", width=Constants.TUI_AUTHOR_WIDTH)
+                threads_table.add_column(
+                    "Message",
+                    style="dim",
+                    min_width=config["output_width"]
+                    - Constants.TUI_AUTHOR_WIDTH
+                    - Constants.TUI_DATE_WIDTH
+                    - Constants.TUI_THREE_COL_PADDING_WIDTH,
+                )
+                for note in comment["notes"]:
+                    update_time = Utils.convert_time(note["updated_at"])
+                    threads_table.add_row(
+                        update_time,
+                        note["author"]["name"],
+                        note["body"],
+                    )
+
+                if reply_needed:
+                    threads_table.add_row(
+                        "",
+                        "Discussion link",
+                        f"{mr['mr_data']['web_url']}#note_{comment['notes'][0]['id']}",
+                    )
+
+                console.print(mr_info_header)
+                console.print(threads_table)
+            write_comment_note_ids_to_file(ids_of_all_last_notes)
 
 
 def run() -> int:
