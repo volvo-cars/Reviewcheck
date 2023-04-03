@@ -67,3 +67,21 @@ class UrlBuilder:
         if ticket_number:
             return f"{jira_url}/{ticket_number}"
         return "No JIRA reference found"
+
+    @staticmethod
+    def construct_award_on_mr_url(
+        api_url: str,
+        project: int,
+        id: int,
+    ) -> str:
+        """Construct URL for dowloading data about awards on an MR.
+
+        :param api_url: Base URL for the GitLab API of the user's GitLab
+            instance.
+        :param project: The project ID of the project to look for merge
+            requests in.
+        :id: The ID of the merge request to get data for.
+
+        :return: The constructed URL.
+        """
+        return f"{api_url}/projects/{project}/merge_requests/{id}/award_emoji"

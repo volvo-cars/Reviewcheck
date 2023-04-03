@@ -28,6 +28,7 @@ from reviewcheck.common.constants import Constants
 from reviewcheck.common.exceptions import RCException
 from reviewcheck.common.url_builder import UrlBuilder
 from reviewcheck.config import Config
+from reviewcheck.reactions import Reactions
 from reviewcheck.utils import Utils
 
 console = Console()
@@ -166,6 +167,8 @@ def get_info_box_content(
     n_all_notes: int,
     n_your_notes: int,
     n_response_required: int,
+    reactors: Optional[str],
+    upvoters: Optional[str],
 ) -> str:
     """Return the content of the info box for an merge request.
 
@@ -182,17 +185,23 @@ def get_info_box_content(
     :return: The text to put in the info box for the given merge
         request.
     """
-    return (
-        f"Open discussions: {n_all_notes}"
-        f"\nOpen discussions where you are involved: {n_your_notes}"
-        "\nOpen discussions you need to respond (colored border): "
-        f"{n_response_required}"
-        f"\n\nGitLab link:   {mr['mr_data']['web_url']}"
-        f"\nJira link:     {UrlBuilder.construct_jira_link(jira_url, jira)}"
-        f"\nSource branch: {mr['mr_data']['source_branch']}"
-        f"\nCreated at:    {Utils.convert_time(mr['mr_data']['created_at'])}"
-        f"\n\n{mr['mr_data']['description']}"
-    )
+    info = ""
+    info += f"Upvotes: {mr['mr_data']['upvotes']}"
+    if upvoters:
+        info += f"\nPeople who have upvoted: {upvoters}"
+    if reactors:
+        info += f"\nPeople who have reacted: {reactors}"
+    info += f"\nOpen discussions: {n_all_notes}"
+    if n_all_notes:
+        info += f"\nOpen discussions where you are involved: {n_your_notes}"
+        info += "\nOpen discussions you need to respond (colored border): "
+        info += f"{n_response_required}"
+    info += f"\n\nGitLab link:   {mr['mr_data']['web_url']}"
+    info += f"\nJira link:     {UrlBuilder.construct_jira_link(jira_url, jira)}"
+    info += f"\nSource branch: {mr['mr_data']['source_branch']}"
+    info += f"\nCreated at:    {Utils.convert_time(mr['mr_data']['created_at'])}"
+    info += f"\n\n{mr['mr_data']['description']}"
+    return info
 
 
 def read_comment_note_ids_from_file() -> Set[str]:
@@ -278,15 +287,27 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
                 mr["project"],
                 id,
             )
+            mrs[id]["reaction_url"] = UrlBuilder.construct_award_on_mr_url(
+                api_url=api_url,
+                project=mr["project"],
+                id=id,
+            )
 
         with ThreadPoolExecutor(max_workers=Constants.THREADPOOL_MAXSIZE) as executor:
             progress.start_task(gitlab_download_task)
-            progress.update(gitlab_download_task, total=len(mrs))
+            progress.update(gitlab_download_task, total=2 * len(mrs))
             for response_json, mr_id in executor.map(
                 Utils.download_gitlab_data,
                 [(mr["url"], id, secret_token) for id, mr in mrs.items()],
             ):
                 mrs[mr_id]["discussion_data"] = response_json
+                progress.update(gitlab_download_task, advance=1)
+
+            for response_json, mr_id in executor.map(
+                Utils.download_gitlab_data,
+                [(mr["reaction_url"], id, secret_token) for id, mr in mrs.items()],
+            ):
+                mrs[mr_id]["reactions"] = Reactions(response_json)
                 progress.update(gitlab_download_task, advance=1)
 
     console.print(
@@ -339,6 +360,8 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
                     n_all_notes,
                     n_your_notes,
                     n_response_required,
+                    mr["reactions"].print_reactors(),
+                    mr["reactions"].print_upvoters(),
                 )
             ),
             title=get_info_box_title(mr, jira_ticket, color),
@@ -425,6 +448,9 @@ def show_reviews(config: Dict[str, Any], no_notifications: bool) -> None:
                 console.print(mr_info_header)
                 console.print(threads_table)
             write_comment_note_ids_to_file(ids_of_all_last_notes)
+        elif mr["reactions"].react_but_no_upvote(user) and mr["author"] != user:
+            console.print(mr_info_header)
+            continue
 
 
 def run() -> int:
