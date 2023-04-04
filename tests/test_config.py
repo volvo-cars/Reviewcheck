@@ -1,4 +1,4 @@
-# Copyright 2022 Volvo Car Corporation
+# Copyright 2023 Volvo Car Corporation
 # Licensed under Apache 2.0.
 
 """Tests for config.py."""
@@ -8,8 +8,8 @@ from unittest import TestCase, mock
 
 import yaml
 
-from reviewcheck.common.constants import Constants
 from reviewcheck.config import Config
+from reviewcheck.constants import Constants
 
 
 class TestConfig(TestCase):
@@ -36,7 +36,7 @@ class TestConfig(TestCase):
         with tempfile.TemporaryDirectory(
             prefix="REVIEWCHECK_TEST_"
         ) as tmpdir, mock.patch(
-            "reviewcheck.common.constants.Constants.CONFIG_PATH",
+            "reviewcheck.constants.Constants.CONFIG_PATH",
             Path(tmpdir) / "reviewcheckrc",
         ):
             Config(True).setup_configuration()
@@ -68,7 +68,7 @@ class TestConfig(TestCase):
         with tempfile.TemporaryDirectory(
             prefix="REVIECHECK_TEST"
         ) as tmpdir, mock.patch(
-            "reviewcheck.common.constants.Constants.CONFIG_PATH",
+            "reviewcheck.constants.Constants.CONFIG_PATH",
             Path(tmpdir) / "reviewcheckrc",
         ):
             config_obj = {

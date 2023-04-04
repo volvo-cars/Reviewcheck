@@ -1,18 +1,17 @@
-# Copyright 2022 Volvo Car Corporation
+# Copyright 2023 Volvo Car Corporation
 # Licensed under Apache 2.0.
 
 """File containing utility functions."""
 import json
 import logging
-import re
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 
-from reviewcheck.common.constants import Constants
-from reviewcheck.common.exceptions import RCException
+from reviewcheck.constants import Constants
+from reviewcheck.exceptions import RCException
 
 
 class Utils:
@@ -47,19 +46,36 @@ class Utils:
         return human_readable_time
 
     @staticmethod
+    def download_data(
+        params: Tuple[str, str, Optional[str], Any]
+    ) -> Tuple[Any, Any, Any]:
+        """Download data for MR, and for reaction if requested.
+
+        This function just calls download_gitlab_data() twice. The point
+        of this is that it makes it possible to download both reaction
+        data and merge request data in the same loop in a multithreading
+        executor.
+        """
+        token, mr_url, reaction_url, metadata = params
+        reaction_response = []
+        if reaction_url:
+            reaction_response = Utils.download_gitlab_data(token, reaction_url)
+        mr_response = Utils.download_gitlab_data(token, mr_url)
+        return mr_response, reaction_response, metadata
+
+    @staticmethod
     def download_gitlab_data(
-        get_data: Tuple[str, int, str],
-    ) -> Tuple[List[Dict[str, Any]], int]:
+        secret_token: str,
+        url: str,
+    ) -> List[Dict[str, Any]]:
         """Download each page of data for a given GitLab MR.
 
-        Download the data for a given MR. All pages are downloaded and
+        Download the data for a given URL. All pages are downloaded and
         then combined to one list. The data mainly contains the comments
         and threads on the MR with associated metadata.
 
-        :param get_data: Information about the data to get. This is the
-            url to the merge request, it's ID, and the token for
-            authenticaing with GitLab.
-
+        :param secret_token: Token to access the GitLab API.
+        :param url: URLs to download data from.
         :return: All data for the MR as a list.
         """
         # This is how to create a reusable connection pool with python
@@ -74,7 +90,6 @@ class Utils:
                     pool_block=True,
                 ),
             )
-            url, mr_id, secret_token = get_data
             response = session.get(url, headers={"PRIVATE-TOKEN": secret_token})
             response_json = json.loads(response.content)
             logging.info(
@@ -115,25 +130,6 @@ class Utils:
 
         if isinstance(response_json, list):
             if len(response_json) == 0 or isinstance(response_json[0], dict):
-                return response_json, mr_id
+                return response_json
 
         raise Exception("Malformed data returned from GitLab.")
-
-    @staticmethod
-    def extract_jira(description: str) -> Optional[str]:
-        """Extract JIRA ticket number from MR description.
-
-        :param description: The description of the MR.
-        :return: Jira ticket number if found, otherwise None.
-        """
-        # Parse the VIRA ticket number
-        jira_regex = re.compile(r".*(?i)JIRA: (.*)(\\n)*")
-        jira_match = jira_regex.match(description)
-        jira = None
-        if jira_match:
-            jira = str(jira_match.group(1))
-            already_a_link_regex = re.compile(r"\[(.*)\].*")
-            already_a_link = already_a_link_regex.match(jira)
-            if already_a_link:
-                jira = str(already_a_link.group(1))
-        return jira
