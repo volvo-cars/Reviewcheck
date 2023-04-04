@@ -1,4 +1,4 @@
-# Copyright 2022 Volvo Car Corporation
+# Copyright 2023 Volvo Car Corporation
 # Licensed under Apache 2.0.
 
 """File containing the Config class for working with config files."""
@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 import yaml
 
-from reviewcheck.common.constants import Constants
+from reviewcheck.constants import Constants
 
 
 class Config:
