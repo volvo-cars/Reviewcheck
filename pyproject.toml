@@ -12,23 +12,23 @@ keywords = ["code review", "gitlab"]
 reviewcheck = "reviewcheck.app:run"
 
 [tool.poetry.dependencies]
-python = "^3.6.9"
-requests = "^2.27.1"
-pyyaml = "^5.1"
-shtab = "^1.5.4"
-colorama = "^0.4.4"
-rich = "^12.4.4"
+python = ">=3.8.1"
+requests = ">=2.27.1"
+pyyaml = ">=5.1"
+shtab = ">=1.5.4"
+colorama = ">=0.4.4"
+rich = ">=12.4.4"
 
-[tool.poetry.dev-dependencies]
-flake8 = "^4.0.1"
+[tool.poetry.group.dev.dependencies]
+flake8 = ">=4.0.1"
 pytest = ">=7.0.1"
-types-PyYAML = "^6.0.7"
-types-requests = "^2.27.29"
-isort = "^5.10.1"
-black = "^22.1.0"
-mypy = "^0.961"
-flake8-docstrings = "^1.6.0"
-flake8-rst-docstrings = {version = "^0.2.7", python = ">=3.7,<4.0.0"}
+types-PyYAML = ">=6.0.7"
+types-requests = ">=2.27.29"
+isort = ">=5.10.1"
+black = ">=22.1.0"
+mypy = ">=0.961"
+flake8-docstrings = ">=1.6.0"
+flake8-rst-docstrings = ">=0.2.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
