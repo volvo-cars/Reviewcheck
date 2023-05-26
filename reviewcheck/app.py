@@ -163,7 +163,7 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
         if (
             mr.user_is_reviewer()
             and mr.number_of_open_threads_needing_user_reply == 0
-            and not show_all_discussions
+            and (not show_all_discussions or len(mr.threads) == 0)
         ):
             continue
 
