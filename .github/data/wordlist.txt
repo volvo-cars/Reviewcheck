@@ -11,3 +11,4 @@ Reviewcheck
 TUI
 changelog
 greyed
+upvoted
