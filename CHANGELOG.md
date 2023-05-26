@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2023-05-26
+
+### Added
+
+- Display merge request where the user has left an emoji reaction but not
+  upvoted (considered to have started a review but not completed it).
+- Introduce Dockerfile and `--no-notifications` flag.
+
+### Changed
+
+- Improve notification message.
+- Update lock file, with latest compatible packages.
+
+### Fixed
+
+- Fixed bug where all merge requests in a project were shown, rather than just
+  the ones where the user is involved.
+
+### Removed
+
+- Drop support for Python 3.6.
+
 ## [0.5.1] - 2022-10-26
 
 ## [0.5.0] - 2022-10-14
