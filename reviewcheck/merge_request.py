@@ -84,8 +84,13 @@ class MergeRequest:
         if self.description is None:
             return None
         # Parse the VIRA ticket number
-        jira_regex = re.compile(r".*(?i)JIRA: (.*)(\\n)*")
-        jira_match = jira_regex.match(self.description.split("\n")[-1])
+        jira_regex = re.compile(
+            # Use +? for non-greedy matching, so we don't get everything
+            # until the last end-of-line in the description
+            r".*^JIRA: (.+?)$",
+            flags=re.IGNORECASE | re.MULTILINE | re.DOTALL,
+        )
+        jira_match = jira_regex.match(self.description)
         jira = None
         if jira_match:
             jira = str(jira_match.group(1))
