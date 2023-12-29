@@ -71,20 +71,13 @@ def write_viewed_message_ids(new_comment_note_ids: Set[str]) -> None:
             f.write(f"{id}\n")
 
 
-def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
-    """Download MR data and present review info for each relevant MR.
-
-    :param config: The resolved configuration of reviewcheck.
-    """
+def apiv4_reviews(config: Dict[str, Any]) -> List[MergeRequest]:
+    """Get review data using Gitlab API v4."""
     secret_token = config["secret_token"]
     api_url = config["api_url"]
-    jira_url = config["jira_url"]
     project_ids = config["project_ids"]
     user = config["user"]
     ignored_mrs = config["ignored_mrs"]
-    show_all_discussions = config["show_all_discussions"]
-    hide_all_threads_user_already_replied_to = config["hide_replied_discussions"]
-
     mr_pages = []
     with Progress(transient=True, expand=True) as progress:
         gitlab_download_task = progress.add_task(
@@ -146,6 +139,24 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
                     )
                 )
                 progress.update(gitlab_download_task, advance=1)
+    return mrs
+
+
+def get_review_data(config: Dict[str, Any]) -> List[MergeRequest]:
+    """Get review data from GitLab based on configuration."""
+    return apiv4_reviews(config)
+
+
+def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
+    """Download MR data and present review info for each relevant MR.
+
+    :param config: The resolved configuration of reviewcheck.
+    """
+    jira_url = config["jira_url"]
+    show_all_discussions = config["show_all_discussions"]
+    hide_all_threads_user_already_replied_to = config["hide_replied_discussions"]
+    user = config["user"]
+    mrs = get_review_data(config)
 
     console.print(
         Panel(
