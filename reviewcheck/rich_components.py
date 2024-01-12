@@ -2,7 +2,7 @@
 # Licensed under Apache 2.0.
 
 """Functions for generating components with the rich module."""
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from rich import box
 from rich.table import Table
@@ -105,7 +105,7 @@ class RichGenerator:
     @staticmethod
     def info_box_content(
         mr: MergeRequest,
-        jira_base_url: str,
+        jira_base_url: Optional[str],
     ) -> str:
         """Return the content of the info box for an merge request.
 
@@ -136,7 +136,8 @@ class RichGenerator:
             info += "\nOpen discussions you need to respond (colored border): "
             info += f"{mr.number_of_open_threads_needing_user_reply}"
         info += f"\n\nGitLab link:   {mr.web_url}"
-        info += f"\nJira link:     {mr.jira_link(jira_base_url)}"
+        if jira_base_url:
+            info += f"\nJira link:     {mr.jira_link(jira_base_url)}"
         info += f"\nSource branch: {mr.source_branch}"
         info += f"\nCreated at:    {Utils.convert_time(mr.creation_time)}"
         info += f"\n\n{mr.description}"

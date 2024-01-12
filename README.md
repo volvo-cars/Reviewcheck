@@ -12,14 +12,14 @@ Reviewcheck is in active development.
 ## Installation
 
 Reviewcheck depends on Python >=3.8.1. There are multiple ways to install it.
-The simplest is with `pip`.
+The simplest is with `pipx`.
 
-### With pip
+### With `pipx`
 
 Reviewcheck can be installed with the following command:
 
 ```console
-$ pip install reviewcheck
+$ pipx install reviewcheck
 ```
 
 ### With Poetry
@@ -30,9 +30,10 @@ create a Python package and install it is to clone the repository and run
 installed. The process looks as follows:
 
 ```console
-$ pip install poetry
+$ pipx install poetry
 $ git clone https://github.com/volvo-cars/Reviewcheck
 $ cd reviewcheck
+$ poetry install
 $ poetry run reviewcheck
 ```
 
@@ -66,6 +67,32 @@ example:
 Notifications are sent using `notify-send` so the notification should look like
 any other desktop notification on your system. They will likely differ in
 visual appearance from the example image.
+
+### Configuration
+
+The first time you run Reviewcheck, the interactive configuration will start. If
+you ever want to reconfigure it, just run `reviewcheck configure`. You can also
+modify the configuration file directly. Unless you configured a separate
+configurations directory, it should be in `~/.config/reviewcheckrc`.
+
+You will be asked for an access token. It can be created in your GitLab
+settings, under "User settings" > "Access Token". It should have at least the
+`read_api` access.
+
+You will also be asked for your "GitLab URL". For the main GitLab instance, it
+would be `https://gitlab.com` but if you have your own instance, use that
+instead. Do not add a slash at the end.
+
+There is the possibility to add a Jira base URL. It is used if you have Jira
+ticket referenced in your commits. An example would be
+`https://jira.example.com`.
+
+Finally, you should fill in the project IDs of projects where you want to track
+merge requests. This can be a bit tricky to find and you might need to consult
+the GitLab documentation. It may be under the title of your repository. It may
+also be to the right of the title, under the three-dots menu.
+
+After that, you're all set.
 
 ## FAQ
 
