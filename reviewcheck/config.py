@@ -37,10 +37,10 @@ class Config:
                     "please provide some information to populate it:"
                 )
 
-            token = input("GitLab API token: ")
+            token = input("GitLab Access Token: ")
             username = input("Username: ")
-            api_url = input("API URL: ")
-            jira_url = input("Jira URL: ")
+            api_url = input("GitLab URL (e.g. https://gitlab.com): ")
+            jira_url = input("Jira URL (optional, press enter to skip): ")
             project_ids = input("Project IDs (space-separated): ")
 
             if project_ids:
@@ -52,9 +52,10 @@ class Config:
                 "secret_token": token,
                 "user": username,
                 "api_url": api_url,
-                "jira_url": jira_url,
                 "project_ids": project_ids_list,
             }
+            if jira_url:
+                config_object["jira_url"] = jira_url
 
             with open(Constants.CONFIG_PATH, "w") as f:
                 f.write(yaml.safe_dump(config_object))

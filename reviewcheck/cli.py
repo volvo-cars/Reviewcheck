@@ -52,22 +52,6 @@ class Cli:
         - You are the author
         - Someone has replied to your comment but you haven't replied back
         - Someone has referenced your @username
-
-        The script needs to be configured before you can use it. Add a
-        ~/.config/reviewcheckrc with the following content:
-
-        ```
-        secret_token: <get a secret token from your settings in gitlab>
-        user: <your username>
-        ```
-
-        There is also some optional configuration:
-
-        ```
-        ignored_mrs: [123, 546, 789] (defult: empty list)
-        show_all_discussions: true (defult: false)
-        hide_replied_discussions: true (default: false)
-        ```
         """,
             formatter_class=RawTextHelpFormatter,
         )

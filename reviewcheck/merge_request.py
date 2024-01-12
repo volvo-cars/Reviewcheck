@@ -72,7 +72,7 @@ class MergeRequest:
     def jira_link(self, jira_base_url: str) -> Optional[str]:
         """Getter for JIRA URL."""
         if self.jira_ticket_number:
-            return f"{jira_base_url}/{self.jira_ticket_number}"
+            return f"{jira_base_url}/browse/{self.jira_ticket_number}"
         return "No JIRA reference found"
 
     def extract_jira(self) -> Optional[str]:

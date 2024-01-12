@@ -8,6 +8,7 @@ reviewcheck --configure.
 """
 import json
 import logging
+import re
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -77,8 +78,8 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
     :param config: The resolved configuration of reviewcheck.
     """
     secret_token = config["secret_token"]
-    api_url = config["api_url"]
-    jira_url = config["jira_url"]
+    api_url = config["api_url"] + "/api/v4"
+    jira_url = config.get("jira_url")
     project_ids = config["project_ids"]
     user = config["user"]
     ignored_mrs = config["ignored_mrs"]
@@ -294,6 +295,10 @@ def run() -> int:
 
     if "hide_replied_discussions" not in config:
         config["hide_replied_discussions"] = args.minimal
+
+    config["api_url"] = re.sub("/api/v4[/]?", "", config["api_url"])
+
+    config["jira_url"] = re.sub("/browse[/]?", "", config["jira_url"])
 
     try:
         if args.refresh_time is None:
