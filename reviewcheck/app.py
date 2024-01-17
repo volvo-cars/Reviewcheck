@@ -7,9 +7,9 @@ You have to configure the script before running it by running
 reviewcheck --configure.
 """
 import json
-import logging
 import re
 import subprocess
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -17,6 +17,7 @@ from shutil import get_terminal_size
 from typing import Any, Dict, List, Set
 
 import requests
+from requests.exceptions import HTTPError, RequestException
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress
@@ -92,22 +93,39 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
             "[green]Downloading MR data...",
             start=False,
         )
-        for project in project_ids:
-            api_url_project = f"{api_url}/projects/{project}"
-            merge_requests_data = json.loads(
-                requests.get(
-                    f"{api_url_project}/merge_requests?state=opened&per_page=500",
-                    headers={"PRIVATE-TOKEN": secret_token},
-                ).content
-            )
-            if isinstance(merge_requests_data, dict):
-                raise Exception("Malformed data received from GitLab")
-            else:
-                mr_pages += [
-                    mr
-                    for mr in merge_requests_data
-                    if str(mr["iid"]) not in ignored_mrs
-                ]
+        with requests.Session() as session:
+            for project in project_ids:
+                api_url_project = f"{api_url}/projects/{project}"
+                projects_url = (
+                    f"{api_url_project}/merge_requests?state=opened&per_page=500"
+                )
+                try:
+                    response = session.get(
+                        projects_url,
+                        headers={"PRIVATE-TOKEN": secret_token},
+                    )
+                    response.raise_for_status()
+                except HTTPError as e:
+                    raise RCException(f"Non-OK HTTP response from GitLab: '{e}'")
+                except RequestException:
+                    raise RCException(
+                        "There was an issue connecting to GitLab. "
+                        f"Failed GET {projects_url}"
+                    )
+
+                try:
+                    merge_requests_data = json.loads(response.content)
+                except ValueError:
+                    raise RCException(
+                        f"Could not decode JSON. API endpoint might be wrong: {api_url}"
+                    )
+
+                else:
+                    mr_pages += [
+                        mr
+                        for mr in merge_requests_data
+                        if str(mr["iid"]) not in ignored_mrs
+                    ]
 
         mrs: List[MergeRequest] = []
 
@@ -313,5 +331,5 @@ def run() -> int:
         print("\nBye bye!")
         return 0
     except RCException as e:
-        logging.error(f"Reviewcheck encountered a problem: {e}")
+        print(f"Reviewcheck encountered a problem: {e}", file=sys.stderr)
         return 1

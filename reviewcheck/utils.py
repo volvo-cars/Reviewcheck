@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
+from requests.exceptions import HTTPError, RequestException
 
 from reviewcheck.constants import Constants
 from reviewcheck.exceptions import RCException
@@ -109,10 +110,27 @@ class Utils:
 
             num_pages = int(response.headers["X-Total-Pages"])
             for page in range(2, num_pages + 1):
-                response = session.get(
-                    f"{url}&page={page}", headers={"PRIVATE-TOKEN": secret_token}
-                )
-                response_json += json.loads(response.content)
+                get_url = f"{url}&page={page}"
+                try:
+                    response = session.get(
+                        get_url, headers={"PRIVATE-TOKEN": secret_token}
+                    )
+                    response.raise_for_status()
+                except HTTPError as e:
+                    raise RCException(f"Non-OK HTTP response from GitLab: '{e}'")
+                except RequestException:
+                    raise RCException(
+                        "There was an issue connecting to GitLab. "
+                        f"Failed GET {get_url}"
+                    )
+
+                try:
+                    response_json += json.loads(response.content)
+                except ValueError:
+                    raise RCException(
+                        f"Could not decode JSON. API endpoint might be wrong: {get_url}"
+                    )
+
                 logging.info(
                     "request was completed in %s seconds [%s]",
                     response.elapsed.total_seconds(),
