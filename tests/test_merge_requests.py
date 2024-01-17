@@ -1,3 +1,6 @@
+# Copyright 2024 Volvo Car Corporation
+# Licensed under Apache 2.0.
+
 """Tests for the merge_requests.py file."""
 from typing import Any, Dict, List
 

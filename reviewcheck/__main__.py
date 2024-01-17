@@ -1,4 +1,4 @@
-# Copyright 2023 Volvo Car Corporation
+# Copyright 2024 Volvo Car Corporation
 # Licensed under Apache 2.0.
 
 """Main file for reviewcheck, where execution starts."""

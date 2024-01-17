@@ -1,4 +1,4 @@
-# Copyright 2023 Volvo Car Corporation
+# Copyright 2024 Volvo Car Corporation
 # Licensed under Apache 2.0.
 
 """File containing the Config class for working with config files."""

@@ -1,4 +1,4 @@
-# Copyright 2023 Volvo Car Corporation
+# Copyright 2024 Volvo Car Corporation
 # Licensed under Apache 2.0.
 
 """Functions for generating components with the rich module."""
