@@ -7,6 +7,7 @@ Gitea
 JIRA
 Jira
 Pontus
+README
 Reviewcheck
 TUI
 changelog
