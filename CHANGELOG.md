@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.7.0] 2024-01-24
+
+### Added
+
+- Catch exceptions related to REST API issues and network issues, in order to
+  show a cleaner error message to the user rather than a stack trace.
+
+### Changed
+
+- Clarify how to configure Reviewcheck, both in the README and in the
+  interactive configuration and allow using base URLs for GitLab and Jira.
 
 ## [0.6.0] - 2023-05-26
 
