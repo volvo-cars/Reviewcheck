@@ -42,6 +42,12 @@ class Config:
             api_url = input("GitLab URL (e.g. https://gitlab.com): ")
             jira_url = input("Jira URL (optional, press enter to skip): ")
             project_ids = input("Project IDs (space-separated): ")
+            merge_request_comments = input(
+                "Check for merge request comments (True/False, default: True): "
+            )
+            approval_events = input(
+                "Check for approval events (True/False, default: True): "
+            )
 
             if project_ids:
                 project_ids_list = [int(i) for i in project_ids.split(" ")]
@@ -53,6 +59,9 @@ class Config:
                 "user": username,
                 "api_url": api_url,
                 "project_ids": project_ids_list,
+                "merge_request_comments": merge_request_comments.lower()
+                != "false",
+                "approval_events": approval_events.lower() != "false",
             }
             if jira_url:
                 config_object["jira_url"] = jira_url

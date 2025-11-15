@@ -86,6 +86,8 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
     ignored_mrs = config["ignored_mrs"]
     show_all_discussions = config["show_all_discussions"]
     hide_all_threads_user_already_replied_to = config["hide_replied_discussions"]
+    merge_request_comments = config.get("merge_request_comments", True)
+    approval_events = config.get("approval_events", True)
 
     mr_pages = []
     with Progress(transient=True, expand=True) as progress:
@@ -149,7 +151,9 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
                 [
                     (
                         secret_token,
-                        mr_url(mr["project_id"], mr["iid"]),
+                        mr_url(mr["project_id"], mr["iid"])
+                        if merge_request_comments
+                        else None,
                         reaction_url(mr["project_id"], mr["iid"]),
                         mr,
                     )
