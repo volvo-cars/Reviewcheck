@@ -31,6 +31,8 @@ class TestConfig(TestCase):
             "https://httpbin.org/status/200",
             "https://httpbin.org/status/200",
             "123 456",
+            "True",
+            "False",
         ]
 
         with tempfile.TemporaryDirectory(
@@ -44,12 +46,14 @@ class TestConfig(TestCase):
             with open(Constants.CONFIG_PATH, "r") as f:
                 config_obj = yaml.safe_load(f)
 
-            self.assertEqual(5, len(config_obj.values()))
+            self.assertEqual(7, len(config_obj.values()))
             self.assertIn("secret_token", config_obj)
             self.assertIn("user", config_obj)
             self.assertIn("api_url", config_obj)
             self.assertIn("jira_url", config_obj)
             self.assertIn("project_ids", config_obj)
+            self.assertIn("merge_request_comments", config_obj)
+            self.assertIn("approval_events", config_obj)
 
             self.assertEqual("very_secret", config_obj["secret_token"])
             self.assertEqual("johndoe", config_obj["user"])
@@ -58,6 +62,8 @@ class TestConfig(TestCase):
             self.assertEqual(2, len(config_obj["project_ids"]))
             self.assertIn(123, config_obj["project_ids"])
             self.assertIn(456, config_obj["project_ids"])
+            self.assertTrue(config_obj["merge_request_comments"])
+            self.assertFalse(config_obj["approval_events"])
 
     def test_setup_configuration_without_reconfigure(self) -> None:
         """Test that configuration file is not altered when not needed.
