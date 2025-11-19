@@ -192,6 +192,7 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
             continue
 
         mrs_requiring_attention_found = True
+
         main_mr_color = Constants.COLORS[mr.id % len(Constants.COLORS)]
         mr_info_header = Panel(
             Text(RichGenerator.info_box_content(mr, jira_url)),
@@ -277,7 +278,7 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
             )
         )
 
-    write_viewed_message_ids(set([id for mr in mrs for id in mr.all_message_ids]))
+    write_viewed_message_ids(set([id for mr in mrs for id in mr.all_last_message_ids]))
 
 
 def run() -> int:
