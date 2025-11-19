@@ -2,10 +2,9 @@
 # Licensed under Apache 2.0.
 
 """__init__ file for reviewcheck containing the __version__ variable."""
-import tomllib
-from pathlib import Path
+from importlib.metadata import PackageNotFoundError, version
 
-pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
-with pyproject_path.open("rb") as f:
-    pyproject_data = tomllib.load(f)
-    __version__ = pyproject_data["tool"]["poetry"]["version"]
+try:
+    __version__ = version("reviewcheck")
+except PackageNotFoundError:
+    __version__ = "unknown"
