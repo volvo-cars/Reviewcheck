@@ -48,7 +48,7 @@ class Utils:
 
     @staticmethod
     def download_data(
-        params: Tuple[str, str, Optional[str], Any]
+        params: Tuple[str, Optional[str], Optional[str], Any]
     ) -> Tuple[Any, Any, Any]:
         """Download data for MR, and for reaction if requested.
 
@@ -67,7 +67,7 @@ class Utils:
     @staticmethod
     def download_gitlab_data(
         secret_token: str,
-        url: str,
+        url: Optional[str],
     ) -> List[Dict[str, Any]]:
         """Download each page of data for a given GitLab MR.
 
@@ -79,6 +79,8 @@ class Utils:
         :param url: URLs to download data from.
         :return: All data for the MR as a list.
         """
+        if not url:
+            return []
         # This is how to create a reusable connection pool with python
         # requests.
 

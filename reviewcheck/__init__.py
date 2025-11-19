@@ -2,4 +2,9 @@
 # Licensed under Apache 2.0.
 
 """__init__ file for reviewcheck containing the __version__ variable."""
-__version__ = "0.7.0"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("reviewcheck")
+except PackageNotFoundError:
+    __version__ = "unknown"
