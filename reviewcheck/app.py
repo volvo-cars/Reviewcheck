@@ -86,6 +86,8 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
     ignored_mrs = config["ignored_mrs"]
     show_all_discussions = config["show_all_discussions"]
     hide_all_threads_user_already_replied_to = config["hide_replied_discussions"]
+    merge_request_comments = config.get("merge_request_comments", True)
+    approval_events = config.get("approval_events", True)
 
     mr_pages = []
     with Progress(transient=True, expand=True) as progress:
@@ -149,7 +151,9 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
                 [
                     (
                         secret_token,
-                        mr_url(mr["project_id"], mr["iid"]),
+                        mr_url(mr["project_id"], mr["iid"])
+                        if merge_request_comments
+                        else None,
                         reaction_url(mr["project_id"], mr["iid"]),
                         mr,
                     )
@@ -178,6 +182,7 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
     )
 
     ids_of_seen_messages = read_viewed_message_ids()
+    mrs_requiring_attention_found = False
     for mr in mrs:
         if (
             mr.user_is_reviewer()
@@ -185,6 +190,8 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
             and (not show_all_discussions or len(mr.threads) == 0)
         ):
             continue
+
+        mrs_requiring_attention_found = True
 
         main_mr_color = Constants.COLORS[mr.id % len(Constants.COLORS)]
         mr_info_header = Panel(
@@ -258,6 +265,18 @@ def show_reviews(config: Dict[str, Any], suppress_notifications: bool) -> None:
                 )
 
             console.print(thread_table)
+
+    if not mrs_requiring_attention_found:
+        console.print(
+            Panel(
+                Text(
+                    "No reviews need your attention. Good job!",
+                    justify="center",
+                ),
+                style="reverse bold",
+                width=config["output_width"],
+            )
+        )
 
     write_viewed_message_ids(set([id for mr in mrs for id in mr.all_last_message_ids]))
 

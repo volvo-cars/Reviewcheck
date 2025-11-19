@@ -2,4 +2,10 @@
 # Licensed under Apache 2.0.
 
 """__init__ file for reviewcheck containing the __version__ variable."""
-__version__ = "0.7.0"
+import tomllib
+from pathlib import Path
+
+pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+with pyproject_path.open("rb") as f:
+    pyproject_data = tomllib.load(f)
+    __version__ = pyproject_data["tool"]["poetry"]["version"]
