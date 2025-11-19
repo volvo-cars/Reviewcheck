@@ -27,35 +27,17 @@ jobs:
 
       - name: Get version from tag
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
-      - name: Upload .tar.gz Release Asset
-        uses: actions/upload-release-asset@v1
+          files: |
+            ./dist/reviewcheck-${{ steps.get_version.outputs.VERSION }}.tar.gz
+            ./dist/reviewcheck-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/reviewcheck-${{ steps.get_version.outputs.VERSION }}.tar.gz
-          asset_name: reviewcheck-${{ steps.get_version.outputs.VERSION }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload .whl Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/reviewcheck-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
-          asset_name: reviewcheck-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
-          asset_content_type: application/wheel+zip
